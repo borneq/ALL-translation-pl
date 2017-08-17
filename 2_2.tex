@@ -1,0 +1,14 @@
+﻿\subsection{Usuwanie lewostronnej rekurencji}
+Strategia analizy składniowej ALL(*) nie obsługuje lewostronnej rekurencji,
+ale ANTLR obsługuje bezpośrednią lewostronną rekurencję poprzez przepisywanie
+gramatyki przed generacją analizatora składni.
+Bezpośrednia lewostronna rekurencja obejmuje najczęstsze przypadki,
+takie jak generowanie wyrażenia arytmetycznego,
+np. $E \rightarrow E.id$, i deklaratorów C.
+Podjęliśmy decyzję, aby nie posługiwać się pośrednią albo ukrytą lewostronną
+rekurencją, ponieważ te formy są znacznie mniej powszechne,
+a usuwanie całej lewostronnej rekurencji może doprowadzić do dużego
+przekształcenia gramatycznego.
+Na przykład, specyfikacja języka gramatyki C11 zawiera mnóstwo bezpośredniej
+lewostronnej rekurencji, ale bez rekurencji pośrednich lub ukrytych.
+Zobacz Załącznik 2.2 w celu uzyskania więcej szczegółów.

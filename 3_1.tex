@@ -1,0 +1,43 @@
+﻿\subsection{Przewidywania wrażliwe na stos wywołań}
+Parsery nie zawsze mogą opierać się na lookahead DFA w podejmowaniu właściwej decyzji.
+Aby obsłużyć wszystkie gramatyki nie lewostronnie rekurencyjne,
+przewidywanie ALL(*) musi od czasu do czasu rozważyć stos wywołań parsera
+dostępnego na początku przewidywania (oznaczone jako 0 w Części 5).
+Aby przedstawić potrzebę przewidywań zależnego od stosu, należy wziąć pod uwagę
+że przewidywania podczas rozpoznawania metody Javy mogą zależeć od tego
+czy metoda została zdefiniowana w ramach definicji klasy lub interfejsu.
+(metody interfejsu Java nie mogą posiadać ciała).
+Oto przykład uproszczonej gramatyki, która wykazuje decyzję zależną od stosu dla symbolu nieterminalnego A:
+\par
+\( S \rightarrow xB|yC  \;\;\; B \rightarrow Aa \;\;\; C \rightarrow Aba \;\;\; A \rightarrow b|\varepsilon\)
+\\
+Bez stosu analizatora, żadna ilość lookahead nie może jednoznacznie rozróżnić
+produkcji A. Lookahead ba przewiduje \(A \rightarrow b\) gdy B wywołuje A,
+natomiast przewiduje \(A \rightarrow \varepsilon \) gdy C wywołuje A.
+W przypadku gdy przewidywanie ignoruje stos wywołań analizatora,
+występuje konflikt przewidywania wobec ba.
+\par
+Parsery, które ignorują stos wywołań analizatora dla przewidywania nazywamy
+Silnymi (Strong) LL (SLL). Parsery rekurencyjne programiści tworzą ręcznie
+w klasie SLL. Zazwyczaj, literatura odnosi się do SLL jako LL,
+ale my rozróżniamy pojęcia, ponieważ „rzeczywiste” LL jest potrzebne aby
+obsłużyć wszystkie gramatyki. Powyższa gramatyka to LL(2), a nie SLL(k) dla
+jakiegokolwiek k, jednak duplikując A otrzymamy gramatykę SLL (2).
+\par
+Tworzenie różnych lookahead DFA dla każdego możliwego stosu wywołań
+analizatora nie jest możliwe, ponieważ liczba permutacji stosu jest
+wykładnicza w funkcji głębokości stosu.
+Zamiast tego możemy skorzystać z faktu, iż większość decyzji nie jest zależna
+od stosu i utworzyć lookahead DFA ignorując stos wywołań analizatora.
+Jeśli symulacja ATN SLL znajduje konflikt przewidywania (Część 5.3),
+to nie możemy być pewni czy zwrot lookahead nie jest jednoznaczny
+albo zależny od stosu. 
+W tym przypadku, adaptivePredict musi ponownie zbadać lookahead używając stosu parsera $\gamma_0$.
+Ten hybrydowy lub zoptymalizowany tryb LL zwiększa wydajność poprzez zapisywaniu
+w pamięci podręcznej wyników przewidywania niezależnych od stosu w lookahead DFA,
+gdy jest to możliwe, przy zachowaniu pełnej siły przewidywania zależnej od siły stosu.
+Zoptymalizowany tryb LL stosuje się na podstawie decyzji,
+ale dwustopniowa analiza składniowa, opisana w dalszej części,
+często może całkowicie uniknąć symulacji LL.
+(Od tej pory używamy SLL, aby wskazać analizę składniową niezależną od stosu
+i LL do wskazania zależności od stosu).

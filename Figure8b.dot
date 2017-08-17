@@ -1,0 +1,18 @@
+digraph Figure8b {
+        rankdir=LR;
+PA [label = <p<SUB>A</SUB>>]
+PA1 [label = <p<sub>A,1</sub>>]
+PA2 [label = <p<sub>A,2</sub>>]
+P5 [label = <p<sub>5</sub>>]
+P6 [label = <p<sub>6</sub>>]
+P7 [label = <p<sub>7</sub>>]
+PF [label = <p'<sub>A</sub>>; shape = doublecircle]
+
+PA->PA1 [ label = <&epsilon;>; weight = 2 ]
+PA->PA2 [ label = <&epsilon;>; weight = 2 ]
+PA1->P5 [ label = <a>; weight = 2 ]
+PA2->P7 [ label = <b>; weight = 2 ]
+P5->P6 [ label = <A>; weight = 2 ]
+P6->PF [ label = <&epsilon;>; weight = 2 ]
+P7->PF [ label = <&epsilon;>; weight = 1]
+}

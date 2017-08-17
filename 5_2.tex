@@ -1,0 +1,253 @@
+﻿\subsection{Funkcje parsowania ALL(*)}
+Teraz możemy omówić kluczowe funkcje ALL(*), które zostały zaznaczone w boksach
+i wymienione poniżej. Niniejszy opis został zapisany w zstępującym porządku i zakłada
+że ATN odpowiadający gramatyce G, semantyczny stan $\mathbb{S}$, tworzone DFA, oraz dane wejściowe
+są odpowiednie dla wszystkich funkcji algorytmu i że semantyczne predykaty oraz działania
+mogą mieć bezpośredni dostęp do $\mathbb{S}$.
+\par
+\textbf{Funkcja parse}. Głównym punktem wejściowym jest funkcja \textit{parse}
+(przedstawiona w Funkcji 1), która inicjuje parsowanie z początkowym symbolem, argument S.
+Funkcja rozpoczyna się od uruchomienia symulacji stosu wywołań $\gamma$ do pustego stosu
+i ustawienia „kursora” stanu ATN $p$ na $p_{S,i}$ stanu ATN w lewej krawędzi produkcji S
+o numerze i przewidzianego za pomocą \textit{adaptivePredict}.
+Funkcja jest w pętli do czasu gdy kursor osiągnie stan zatrzymania $p'_S$ podmaszyny dla S.
+Gdy kursor osiągnie kolejny stan zatrzymania podmaszyny $p'_B$, funkcja \textit{parse}
+symuluje „powrót” wyświetlając stan powrotny q ze stosu wywołań i przenosząc p do q.
+\\
+\minibox[frame]{\textbf{Function 1}:parse(S)\\
+$\gamma$ := []; i:=adaptivePredict(S,$\gamma$); p:=$p_{S,i}$; \\
+\textbf{while} true \textbf{do} \\
+\tab \textbf{if} p=$p'_B$ \{czyli p jest regułą stanu stop\} \textbf{then} \\
+\tab \tab \textbf{if} B=S \{startowa reguła S końcowego dopasowania\} \textbf{then return}; \\
+\tab \tab \textbf{else let} $\gamma=q\gamma'$ \textbf{in} $\gamma:=\gamma'$; p:=q; \\
+\tab \textbf{else} \\
+\tab \tab \textbf{switch} t where $p \overset{t}{\rightarrow} q$ \textbf{do} \\
+\tab \tab \tab \textbf{case} b: \{ czyli przejście symbolu terminalnego\} \\
+\tab \tab \tab \tab \textbf{if} b=input.curr() \textbf{then}\\
+\tab \tab \tab \tab \tab p:=q; input.advance();\\
+\tab \tab \tab \tab \textbf{else} parse error;\\
+\tab \tab \tab \textbf{case} B: $\gamma:=q\gamma$;i:=adaptivePredict(B,$\gamma$); p:=$p_{B,i}$; \\
+\tab \tab \tab \textbf{case} $\mu$: $\mathbb{S}$:=$\mu(\mathbb{S})$; p:=q; \\
+\tab \tab \tab \textbf{case} $\pi$: \textbf{if} $\pi(\mathbb{S})$ \textbf{then} p:=q \textbf{else} parse error; \\
+\tab \tab \tab \textbf{case} $\epsilon$: p:=q; \\
+\tab \tab \textbf{endsw} \\
+}
+\par
+Dla p nie w stanie zatrzymania, analiza dokonuje przejścia ATN $p\overset{t}{\rightarrow}q$.
+Może wystąpić tylko jedno przejście z p, ze względu na sposób w jaki ATNy są utworzone.
+Jeśli t jest symbolem terminalnym krawędzi i pasuje do bieżącego symbolu wejściowego,
+\textit{parse} przechodzi przez krawędź i przechodzi do następnego symbolu.
+Jeśli t jest symbolem nieterminalnym krawędzi, odwołującym się do niektórych B, \textit{parse} symuluje
+wywołania podmaszyny wkładając stan powrotny q na stos i wybierając odpowiednie produkcje lewej krawędzi w B
+poprzez wywołanie \textit{adaptivePredict} i ustawiając odpowiednio kursor.
+Dla krawędzi akcji, \textit{parse} aktualizuje stan zgodnie z mutatorem i przechodzi do q.
+Dla krawędzi predykatu, parse przechodzi tylko jeśli predykat $\pi$ ocenia za prawdziwy.
+Podczas parsowania, niezatwierdzone predykaty zachowują się jak niedopasowane symbole.
+Dla krawędzi $\epsilon$, \textit{parse} przechodzi do q.
+Funkcja \textit{parse} nie sprawdza jawnie czy parsowanie zatrzymuje się na końcu pliku,
+ponieważ aplikacje, takie jak środowisko programistyczne powinny parsować wejściowe podfrazy.
+\par
+\textbf{Funkcja adaptivePredict}. Do przewidywania produkcji, \textit{parse} wywołuje \textit{adaptivePredict}
+(Funkcja 2), która jest funkcją decyzji symboli nieterminalnych A i bieżącego stosu analizatora $\gamma_0$.
+Ponieważ w trakcie pełnej symulacji LL przewidywanie ocenia tylko predykaty, \textit{adaptivePredict}
+przechodzi do \textit{LLpredict} jeśli przynajmniej jedna z produkcji jest predykatem.\footnotemark[5]
+\footnotetext[5]{
+Predykcja SLL nie włącza predykatów dla czytelności w tym naświetleniu tematu,
+ale w praktyce ANTLR włącza predykaty do stanów akceptowalnych DFA (Sekcja B.2).
+DFA ANTLR 3 używało predykatowych krawędzi a nie predykatowych stanów akceptujących.}
+W przypadku decyzji, które nie posiadają jeszcze DFA, \textit{adaptivePredict} tworzy DFA $dfa_A$
+z początkowym stanem $D_0$ w przygotowaniu do \textit{SLLpredict} aby dodać ścieżki DFA.
+$D_0$ jest zbiorem konfiguracji ATN osiągalnym bez przechodzenia przez krawędzie terminali.
+Funkcja \textit{adaptivePredict} tworzy również zbiór stanów końcowych $F_{DFA}$,
+który zawiera jeden stan końcowy $f_i$ dla każdej produkcji A. Zbiór stanów DFA, $Q_{DFA}$,
+jest powiązany z $D_0$, $F_{DFA}$ oraz stanem błędu $D_{error}$.
+Słownik $\Sigma_{DFA}$ to zbiór terminali gramatycznych T.
+W przypadku nieprzewidzianych decyzji z istniejącym DFA, \textit{adaptivePredict} wywołuje
+\textit{SLLpredict} do uzyskania przewidywania z DFA, z możliwością rozszerzenia DFA poprzez
+symulację ATN w procesie.
+Ostatecznie, z faktu iż \textit{adaptivePredict} tylko przegląda, a nie przeprowadza analizy składniowej,
+musi cofnąć jakiekolwiek zmiany wprowadzone do kursora wejściowego,
+poprzez przechwytywanie indeksu wejściowego jako start na początku przewijanie na początek przed wyjściem.
+\\
+\minibox[frame]{\textbf{Function 2}:adaptivePredict(A,$\gamma_0$) \textbf{returns} int alt\\
+start:=input.index(); // checkpoint input \\
+\textbf{if} $\exists A \rightarrow \pi_i \alpha_i $ \textbf{then} \\
+\tab alt:=LLpredict(A,start,$\gamma_0$); \\
+\tab input.seek(start); //wycofanie zmian pozycji strumienia \\
+\tab return alt; \\
+\textbf{if} $\nexists dfa_A$ \textbf{then} \\
+\tab $D_0$ := startState(A,\#);\\
+\tab $F_{DFA}$ := \{ f_i | f_i:=DFA.State(i) $\forall A \rightarrow \alpha_i $\} \\
+\tab $Q_{DFA}$ := $D_0 \cup F_{DFA} \cup  D_{error} $ \\
+\tab $dfa_A$ := DFA($Q_{DFA},\Sigma_{DFA}=T,\Delta_{DFA}=\varnothing, D_0,F_{DFA}$); \\
+alt:=SLLpredict(A,$D_0$,start,$\gamma_0$); \\
+input.seek(start);  //wycofanie zmian pozycji strumienia \\
+return alt;
+} \\
+\par
+\textbf{Funkcja startState}. Aby utworzyć startowy stan DFA $D_0$,
+\textit{startState} (Funkcja 3) dodaje konfiguracje $(p_{A,i}, i, \gamma)$
+dla każdego $A \rightarrow \alpha_i$ oraz $A \rightarrow \pi_i \alpha_i$,
+jeśli $\pi_i$ oceniony jako prawdziwy.
+W przypadku wywołania z \textit{adaptivePredict} argument stosu wywołań $\gamma$
+jest specjalnym symbolem \# wymaganym przez predykcję SLL, wskazując „brak informacji stosu analizatora”.
+W przypadku wywołania z \textit{LLpredict}, $\gamma$ jest początkowym stanem stosu
+analizatora $\gamma_0$.
+Obliczenie \textit{closure} konfiguracji skompletuje $D_0$.
+\\
+\minibox[frame]{\textbf{Function 3}:startState(A,$\gamma$) \textbf{returns} DFA.State $D_0$\\
+$D_0:=\varnothing$ \\
+\textbf{foreach} $p_A \overset{\epsilon}{\rightarrow} p_{A,i} \in \Delta_{ATN}$ \textbf{do}\\
+\tab \textbf{if} $p_A \overset{\epsilon}{\rightarrow} p_{A,i}\overset{\pi_i}{\rightarrow} p $
+     \textbf{then} $\pi:=\pi_i $ \textbf{else} $\pi:=\epsilon $; \\
+\tab \textbf{if} $\pi=\epsilon $ or eval($\pi_i $) \textbf{then} $D_0$ += closure(\{\}, $D_0,(p_{A,i},i,\gamma) $);\\
+return $D_0$;
+} \\
+\par
+\textbf{Funkcja SLLpredict}. Funkcja \textit{SLLpredict} (Funkcja 4) dokonuje zarówno symulację
+DFA jak i SLL ATN, stopniowo dodając ścieżki do DFA.
+W najlepszym przypadku, występuje już ścieżka DFA z $D_0$ do akceptowalnego stanu, $f_i$
+dla przedrostka $u \preceq w_r$ i pewnej produkcji o numerze $i$.
+W najgorszym przypadku symulacja ATN jest wymagana dla wszystkich $a$ w sekwencji $u$.
+Główna pętla w \textit{SLLpredict} znajduje istniejącą krawędź wychodzącą ze stanu DFA
+kursora D w $a$ lub oblicza nową za pomocą \textit{target}.
+Możliwe jest że \textit{target} obliczy stan docelowy \underline{D'}, który już istnieje w DFA,
+w którym funkcja \textit{target} zwraca \underline{D'};
+ponieważ \underline{D'} może już mieć obliczone krawędzie wychodzące,
+nieefektywne jest odrzucenie pracy przez zastępując \underline{D'}.
+W następnej iteracji, SLLpredict rozważy krawędzie z \underline{D'},
+skutecznie przełączając na symulację DFA.
+\\
+\minibox[frame]{\textbf{Function 4}:SLLpredict(A,$D_0, start, \gamma_0$) \textbf{returns} int prod\\
+a:=input.curr(); D = $D_0$;\\
+\textbf{while} true \textbf{do}\\
+\tab \textbf{let} D' be DFA target $D \overset{a}{\rightarrow}D'$ \\
+\tab \textbf{if} D'=$D_{error}$ then parse error; \\
+\tab \textbf{if} D' stack sensitive \textbf{then}\\
+\tab \tab input.seek(start); return LLredict(A,start, $\gamma_0$); \\
+\tab \textbf{if} D'=$f_i \in F_{DFA}$ \textbf{then return} i;\\
+\tab D:=D'; a:=input.next();
+}
+\par
+Gdy tylko \textit{SLLpredict} osiągnie stan docelowy D', wówczas sprawdza
+pod kątem błędów, zależności stosu i ukończenia.
+W przypadku gdy \textit{target} D' jest oznaczony jako zależny od stosu,
+przewidywanie wymaga pełnej symulacji LL, a \textit{SLLpredict} wywołuje \textit{LLpredict}.
+W przypadku gdy D' jest akceptowalnym stanem $f_i$ jsko określone przez \textit{target},
+\textit{SLLpredict} zwraca $i$.
+W tym przypadku, wszystkie konfiguracje w D' przewidują taką samą produkcję i.
+Dalsza analiza nie jest już potrzebna, a algorytm może zostać zatrzymany.
+Dla jakiegokolwiek innego D' algorytm ustawia D na D', pobiera następny symbol i powtarza.
+\par
+\textbf{Funkcja target}. Przy użyciu połączonych operacji \textit{move-closure}
+funkcja \textit{target} wykrywa zbiór konfiguracji ATN osiągalny z D
+na jednym symbolu terminalnym $a \in T$. Funkcja \textit{move} oblicza konfiguracje
+osiągalne bezpośrednio na a poprzez przejście terminalnej krawędzi:
+\par
+move(D,a) = \{$(q,i,\Gamma) | p \overset{a}{\rightarrow} q, (p,i,\Gamma)\in D $\}
+\par
+Te konfiguracje i ich \textit{closure} formują D'.
+Jeśli D' jest puste, żadna alternatywa nie jest wykonalna, ponieważ żadna nie może dopasować
+$a$ z bieżącego stanu, tak więc \textit{target} zwraca stan błędu $D_{error}$.
+Jeśli wszystkie konfiguracje w D' przewidują taki sam numer produkcji i,
+\textit{target} dodaje krawędź $D \overset{a}{\rightarrow} f_i$ i zwraca stan akceptowalny $f_i$.
+Jeśli D' ma konfliktujące konfiguracje, \textit{target} zaznacza D' jako zależny od stosu.
+Konfliktem może być niejednoznaczność albo słabość wynikająca z braku informacji stosu parsera SLL.
+(Konflikty wraz z \textit{getConflictSetsPerLoc} i \textit{getProdSetsPerState} zostały opisane w Sekcji 5.3).
+Funkcja kończy poprzez dodanie stanu D', jeśli odpowiedni stan \underline{D'} nie występuje już w DFA,
+oraz dodając krawędź $D\overset{a}{\rightarrow}D'$.
+\\
+\minibox[frame]{\textbf{Function 5}:target(D,a) \textbf{returns} DFA.State D'\\
+mv:=move(D,a);\\
+D':=$\bigcup_{c \in mv}^{}$ closure(\{\},c);\\
+\textbf{if} D'=$\varnothing$ \textbf{then} $\Delta_{DFA}$ += $D\overset{a}{\rightarrow}D_{error}$;
+            \textbf{return} $D_{error}$; \\
+\textbf{if} \{ j|(-,k,-)$\in D'$\} = \{i\} \textbf{then} \\
+\tab $\Delta_{DFA}+=D\overset{a}{\rightarrow}f_i$; \textbf{return} $f_i$;//Predykcja reguły i \\
+//Patrz na konflikt między konfiguracjami D' \\
+a.conflict:=$\exists alts \in$getConflictSetsPerLoc(D'): |alts|>1; \\
+viablealt:=$\exists alts \in$getProdSetsPerState(D'): alts|=1; \\
+\textbf{if} a.conflict and not viablealt \textbf{then} \\
+\tab mark D' as stack sensitive; \\
+\textbf{if} D'= \underline{D'}$\in Q_{DFA}$ \textbf{then} D':= \underline{D'}; else $Q_{DFA}$+= D'; \\
+$\Delta_{DFA}$+=$D\overset{a}{\rightarrow}D'$;\\
+\textbf{return} D';
+} \\
+\par
+\textbf{Funkcja LLpredict}. W przypadku konfliktu symulacji SLL, \textit{SLLpredict} przewija
+dane wejściowe i wywołuje \textit{LLpredict} (Funkcja 6) w celu uzyskania przewidywania
+opartego na symulacji LL ATN, która uwzględnia pełny stos analizatora $\gamma_0$.
+Funkcja \textit{LLpredict} jest podobna do \textit{SLLpredict}.
+Wykorzystuje stan DFA D jako kursor i stan D' jako cel przejścia dla spójności,
+ale nie aktualizuje DFA A, tak więc przewidywanie SLL w dalszym ciągu może używać DFA.
+Przewidywanie LL postępuje aż $D' = \varnothing $, D' jednoznacznie przewidzi alternatywę,
+lub D' będzie miało konflikt.
+Jeśli D' z symulacji LL wykazuje konflikt, podobnie jak SLL, algorytm raportuje niejednoznaczną frazę
+(jako dane wejściowe od startu do bieżącego indeksu) i rozwiązuje do minimalnego numeru
+produkcji wśród sprzecznych konfiguracji.
+(Sekcja 5.3 opisuje wykrywanie niejednoznaczności). W przeciwnym razie, kursor D przenosi się
+do D' i uwzględnia następny symbol wejściowy.
+\\
+\minibox[frame]{\textbf{Function 6}:LLpredict(A,start, $\gamma_0$) \textbf{returns} int alt\\
+D:=$D_0$:=startState(A, $\gamma_0$);\\
+\textbf{while} true \textbf{do} \\
+\tab mv:=move(D, input.curr()); \\
+\tab D':=$\bigcup_{c \in mv}$ closure(\{\},c); \\
+\tab \textbf{if} D'=$\varnothing$ then parse error; \\
+\tab \textbf{if} \{ j|(-,j,-) $\in$ D'\} = \{i\} \textbf{then return} i; \\
+\tab /* Jeśli wszystkie pary p,$\Gamma$ przewidzą > 1 alt i wszystkie \\
+\tab zbiory produkcji są takie same, input niejednoznaczny */ \\
+\tab altsets:=getConflictSetsPerLoc(D'); \\
+\tab \textbf{if} $\forall x,y \in altsets$, x=y and |x|>1 \textbf{then} \\
+\tab \tab x:=dowolny zbiór z altsets; \\
+\tab \tab raportuj niejednoznaczny alt x z start..input.index(); \\
+\tab \tab \textbf{return} min(x); \\
+\tab D:=D'; input.advance();
+} \\
+\par
+\textbf{Funkcja closure}. Operacja \textit{closure} (Funkcja 7) przechodzi przez wszystkie $\epsilon$ krawędzie
+osiągalne z p, stanu ATN rzutowanego z parametru konfiguracji c oraz symuluje wywołanie i powrót podmaszyn.
+Funkcja \textit{closure} traktuje krawędzie $\mu$ i $\pi$ jako krawędzie $\epsilon$,
+ponieważ mutatory nie powinny zostać wykonywane podczas przewidywania,
+a predykaty są oceniane tylko podczas wyliczenia stanu początkowego.
+Z parametru $c = (p, i, \Gamma)$ i krawędzi $p \overset{\epsilon}{\rightarrow} q$
+\textit{closure} dodaje $(q, i, \Gamma)$ do zbioru roboczego C.
+W przypadku submaszyny wywołującej krawędź $p \overset{B}{\rightarrow} q$,
+\textit{closure} dodaje \textit{closure} $(p_B; i; q\Gamma)$.
+Powracając ze stanu stopu submaszyny $p'_B$ dodaje \textit{closure} konfiguracji $(q, i, \Gamma)$
+w którym c wyglądałoby następująco $(p'_B; i; q\Gamma)$.
+Ogólnie rzecz biorąc, stos konfiguracji $\Gamma$ jest grafem reprezentującym wiele indywidualnych stosów.
+Funkcja \textit{closure} musi symulować powrót z każdego szczytu stosu z $\Gamma$.
+Algorytm używa notacji $q\Gamma' \in \Gamma$ do reprezentacji wszystkich szczytów stosów q z $\Gamma$.
+Aby uniknąć braku zakończenia z powodu prawej rekursji SLL  oraz $\epsilon$ krawędzi w podregułach,
+takich jak ()+, \textit{closure} wykorzystuje zbiór \textit{busy} dzielony pomiędzy
+wszystkie operacje zamknięcia, używanych do wyliczenia takiego samego D'.
+\par
+Gdy zamknięcie osiągnie stan stopu $p'A$ dla decyzji wejściowej reguły,
+przewidywania LL i SLL zachowują się inaczej. Przewidywanie LL pobiera ze stosu wywołań
+parsera $\gamma_0$ i „powraca” do stanu, który wywołał podmaszynę A.
+Natomiast przewidywanie SLL nie ma dostępu do stosu wywołań analizatora i musi
+rozważać wszystkie możliwe miejsca wywołań A.
+Funkcja \textit{closure} w tej sytuacji znajduje $\Gamma$ = \# (oraz $p'_B = p'_A$),
+w tej sytuacji ponieważ \textit{startState} powinno ustawić początkowy stan stosu jako \#
+a nie $\gamma_0$;
+Zachowanie się podczas powrotu w decyzji reguły wejściowej jest tym co odróżnia SLL od analizy składniowej LL.
+\par
+\minibox[frame]{\textbf{Function 7}:closure(busy, c=(p,i,$\Gamma$)) \textbf{returns} zbiór C\\
+\textbf{if} c $\in$ busy \textbf{then return} $\varnothing$;\textbf{else} busy += c;\\
+C:=\{c\};\\
+\textbf{if} p=$p'B$ (czyli p jest jakimkolwiek stanem stopu włączając $p'A$) \textbf{then}\\
+\tab \textbf{if} $\Gamma$=\# (czyli stos jest wieloznaczny SLL) \textbf{then}\\
+\tab \tab C+= $\bigcup_{\forall p_2:p_1 \overset{B}{\rightarrow} p_2 \in \Delta_{ATN}}$closure(busy,($p_2$,i,\#)) //wołanie closure położenia \\
+\tab \textbf{else} //niepusty stos SLL lub LL \\
+\tab \tab \textbf{for} q$\Gamma' \in \Gamma$ (czyli każdy szczyt q stosu w grafie $\Gamma$) \textbf{do} \\
+\tab \tab \tab C+= closure(busy (q,u,$\Gamma'$)); //„return” do q \\
+\tab \textbf{return} C; \\
+\textbf{end} \\
+\textbf{foreach} $p \overset{edge}{\rightarrow} q$ do \\
+\tab \textbf{switch} edge \textbf{do} \\
+\tab \tab B: C+= closure(busy, ($p_B,i,q\Gamma$)); \\
+\tab \tab $\pi,\mu,\epsilon$: C+= closure(busy, ($q,i,\Gamma$));\\
+\textbf{return} C;
+}
+

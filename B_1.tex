@@ -1,0 +1,14 @@
+﻿\subsection{Redukowanie czasu rozgrzewki}
+Dużo decyzji w gramatyce jest LL(1) i one są łatwe do identyfikacji
+statycznie. Zamiast zawsze generować “przełącz się na
+adaptivePredict” decyzje w rekurencyjnych zstępujących parserach,
+ANTLR generuje decyzje “przełącz się na typ tokenu” gdziekolwiek
+jest możliwe. Ta optymalizacja LL(1) nie wpływa na wielkość
+generowanego parsera ale redukuje ilość lookahead DFA
+które parser musi wyliczyć.
+\par
+Oryginalnie przeczuliśmy "trenowanie” parsera na wielkim
+korpusie wejściowym a następnie zapisanie lookahead DFA na dysk
+aby uniknąć jeszcze raz obliczania DFA dla kolejnych przebiegów parsera.
+Jak pokazane w części 7, konstrukcja lookahead DFA jest wystarczająco szybka
+tak że zapisanie i odczyt DFA jest zbyteczny.

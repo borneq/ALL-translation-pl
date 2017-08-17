@@ -1,0 +1,23 @@
+﻿\subsection{Dwuetapowa analiza składniowa ALL(*)}
+SLL jest słabsze, ale szybsze niż LL.
+Z faktu iż wykazano, że większość decyzji jest SLL w praktyce, wydaje się
+sensowne aby wykonać próbę analizy składniowej wszystkich danych wejściowych
+„tylko w trybie SLL”, co jest pierwszym etapem dwuetapowej analizy składniowej algorytmu ALL(*).
+Jeśli jednak, tryb SLL wykryje błąd składniowy, wówczas albo jest to słabość SLL
+albo prawdziwy błąd składniowy, tak więc musimy ponownie rozpatrzyć wszystkie
+dane wejściowe używający zoptymalizowanego trybu LL, który jest drugim etapem.
+Ta nieintuicyjna strategia, która potencjalnie parsuje cały strumień wejściowy dwukrotnie,
+może dramatycznie zwiększyć prędkość w porównaniu do jednoetapowego zoptymalizowanego trybu LL.
+Na przykład, dwu-etapowa analiza składniowa z gramatyką Java (Część 7) jest 8x szybsza
+niż jednoetapowy zoptymalizowany tryb LL do przeprowadzania analizy składniowej korpus 123M.
+Dwuetapowa strategia opiera się na fakcie, że SLL zachowuje się jak LL
+lub otrzymujemy błąd składniowy (Twierdzenie 6.5).
+Dla nieprawidłowych zdań, \textbf{nie występuje żadne wyprowadzenie dla danych
+wejściowych} niezależnie od tego jak parser wybiera produkcje.
+Dla prawidłowych zdań, SLL wybiera produkcje podobnie jak LL albo dobiera produkcję,
+która ostatecznie prowadzi do błędu składniowego (LL wykazuje niewykonalny wybór).
+Nawet w obecności niejednoznaczności, SLL często rozwiązuje konflikty, podobnie jak LL.
+Na przykład, pomimo kilku niejednoznaczności w naszej gramatyce Javy, tryb SLL
+poprawnie przeprowadza analizę składniową wszystkich danych wejściowych,
+bez doznania niepowodzenia w LL. Niemniej jednak,
+drugi etap (LL) musi pozostawać do zapewnienia poprawności.

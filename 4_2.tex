@@ -1,0 +1,61 @@
+﻿\subsection{Sprecyzowanie niejednoznaczności}
+Niejednoznaczna gramatyka jest taką, w który taka sama sekwencja danych wejściowych
+może być rozpoznawana na wiele sposobów.
+Zasady na Rysunku 6 nie wykluczają niejednoznaczności. 
+
+\begin{figure}[h]
+\noindent\rule{\linewidth}{1pt} \\
+\( A \in N \) symbol nieterminalny \\
+\( a,b,c,d \in T \) symbol terminalny \\
+\( X \in (N \cup T) \) element produkcji \\
+\( \alpha,\beta,\delta \in X^* \) sekwencja symboli gramatyki \\
+\( u,v,w,x,y \in T^* \) sekwencja symboli terminalnych \\
+\( \varepsilon \) pusty ciąg \\
+\$ koniec strumienia symboli \\
+\( \pi \in \Pi \) predykat w języku docelowym \\
+\( \mu \in \mathcal{M} \) akcja w języku docelowym \\
+\( \lambda \in (N \cup \Pi \cup \mathcal{M}) \) etykieta redukcji \\
+\( \overset{\rightarrow}{\lambda} = \lambda_1 ..\lambda_n\) sekwencja etykiet redukcji \\
+Reguły produkcji:\\
+\( A \rightarrow \alpha_i \) i-ta bezkontekstowa produkcja A \\
+\( A \rightarrow \{ \pi_i \} ? \alpha_i \) i-ta produkcja predykowana na semantyce \\
+\( A \rightarrow \{ \mu_i \} \) i-ta produkcja z mutatorem \\
+\noindent\rule{\linewidth}{1pt} 
+\caption{Notacja gramatyki predykatowej}
+\end{figure}
+
+\begin{figure}[h]
+\noindent\rule{\linewidth}{1pt} \\
+\begin{adjustwidth}{2cm}{}
+Prod \( \frac{A \rightarrow \alpha}{ (\mathbb{S}, uA\delta) \Rightarrow (\mathbb{S}, u\alpha\delta)} \) 
+\\
+\( \pi(\mathbb{S}) \)
+\\
+Sem \( \frac{A \rightarrow \{ \pi \} ? \alpha}{ (\mathbb{S}, uA\delta) \Rightarrow (\mathbb{S}, u\alpha\delta)} \) 
+\\
+Action \( \frac{A \rightarrow \{ \mu \} }{ (\mathbb{S}, uA\delta) \Rightarrow (\mu (\mathbb{S}), u\delta)} \) 
+\\
+Closure \( \frac{ (\mathbb{S},\alpha) \Rightarrow (\mathbb{S'},\alpha'),
+(\mathbb{S'},\alpha') \Rightarrow^* (\mathbb{S''},\beta) }{(\mathbb{S},\alpha) \Rightarrow^* (\mathbb{S''},\beta)} \) 
+\\
+\end{adjustwidth}
+\noindent\rule{\linewidth}{1pt}
+\caption{Reguły lewostronnego wyprowadzania gramatyki predykatowej}
+\end{figure}
+
+Jednakże, dla praktycznego analizatora języka programowania,
+wszystkie dane wejściowe powinny odpowiadać analizie składniowej.
+W tym celu, ALL(*) używa kolejności produkcyjnych w regule do rozpoznania
+niejednoznaczności na korzyść produkcji o najniższym numerze.
+Strategia ta jest zwięzłym sposobem dla programistów, aby rozpoznać niejednoznaczności
+automatycznie oraz znaną niejednoznaczność if-then-else w zwykły sposób
+poprzez kojarzenie ‘else’ z ostatnim ‘if’. Parsery PEG i Bison mają te same zasady rozpoznawania.
+\par
+Do rozpoznania niejednoznaczności, które zależą od bieżącego stanu S, programiści mogą
+wprowadzać semantyczne predykaty, jednakże muszą wzajemnie wykluczyć dla wszystkich
+potencjalnie niejednoznacznych sekwencji wejściowych do otrzymania tego typu jednoznacznych produkcji.
+Statycznie wzajemnych wykluczeń nie da się wymusić, ponieważ predykaty są napisane w języku Turinga.
+Jednakże, w czasie analizy ALL(*) wylicza predykaty i dynamicznie raportuje
+frazy wejściowe dla których wielokrotne, predykowalne produkcje są wykonalne.
+Jeśli programistom nie udaje się ustalić wzajemnej wyłączności, ALL(*)
+wykorzystuje kolejność produkcji do rozpoznania niejednoznaczności.

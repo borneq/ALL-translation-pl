@@ -1,0 +1,52 @@
+﻿\subsection{Wyliczenie semantycznych predykatów}
+Dla jasności, algorytm opisany w tym artykule uźywa czystej
+symulacji ATN dla wszystkich decyzji które mają that semantyczne predykaty
+na lewymch krawędziach produkcji W praktyce ANTLR używa lookahead
+DFA które śledzą predykaty i akceptują stany do obsługi senemtycznej
+zależnej od kontekstu predykcji. Śledzenie predykatów w
+DFA pozwala predykcjom uniknąć drogiej symulacji ATN jeśli
+wyliczenie predykatu w ciągu symulacji SLL przewidzi unikalną
+produkcję. Semantyczne predykaty nie są powszechne ale są krytyczne
+do rozwiązywania pewnych zależnych od kontekstu problemów paroswania, to jest,
+predykaty są używane wewnętrznie przez ANTLR do kodowania
+priorytetu operatorów przy przepisywaniu lewostronnie rekurencyjnych reguł.
+Tak że to jest warte dodatkowej złożoności do obliczenia
+predykatów podczas predykcji SLL.
+Rozważmy repdykowaną regułę z Części 2.1:
+\par
+id : ID | \{!enum_is_keyword\}? 'enum' ;
+\\
+Druga produkcja jest wykonalna tylko kiedy !enum_is_keyword
+jest wylcizony do true. W skrócie to oznacza że parser mógłby
+potrzebować dwa two lookahead DFA, jeden na warunke semantyczny.
+Zamiast tego implementacja ANTLR ALL(*) tworzy DFA (przez
+predykcję SLL) z krawędzią $D_0 \overset{enum}{\longrightarrow} f_2$
+gdzie $f_2$ jest wzbogaconym stanem akceptującym DFA
+który testuje !enum_is_keyword.
+Funkcja adaptivePredict zwraca produkcję 2 na enum jeśli
+!enum_is_keyword w przeciwnym razie rzuca wyjątek no-viable-alternative.
+\par
+Algorytm opisany w tym artykule również nie obsługuje
+semantycznych predykatów poza regułą wejścia decyzji.
+W praktyce analiza ALL(*) musi wyliczyć wszystkie predykaty osiągalne
+z reguły wejścia decyzji bez przestępowania krawędzi terminalu
+w ATN. Na przykład uproszczony algorytm ALL(*) w tym artykule rozważa jedynie
+predykaty $\pi_1$ i $\pi_1$ dla produkcji S dla następującej (niejednoznacznej) gramatyki.
+\begin{itemize}
+\item $S\rightarrow \{\pi_1\}? Ab | \{\pi_2\}? Ab$
+\item $A\rightarrow \{\pi_3\}? a | \{\pi_4\}? a$
+\end{itemize}
+Wejście dopasowuje zarówno alternatywę S i w praktyce
+ANTRL wylicza "$\pi_1$ and ($\pi_3$ or $\pi_4$)" do testowania wykonalności
+pierwszej procukcji a nie tylko "%\pi_1%. Po symulacji podmaszyn S
+i A, lookahead DFA dla S byłby
+$D_0\overset{a}{\rightarrow}D'\overset{b}{\rightarrow}f_{1,2}$
+Wzbogacony akceptujący stan $f_{1,2}$ przewiduje produkcje
+1 lub 2 w zależności od semantycznego kontekstu odpowiednio
+$\pi_1 \wedge (\pi_3 \vee \pi_4)$
+Do trzymania śladu kontekstu semantycznego podczas symulacji SLL,
+konfiguracje ANTLR ATN
+zawierają dodatkowy $\pi$: (p, i, $\Gamma$, $\pi$).
+Element $\pi$ niesie ze sobą
+kontekst semantyczny i ANTLR pamięta pary predikat-do-produkcji
+we wzbogaconym stanie akceptującym DFA.

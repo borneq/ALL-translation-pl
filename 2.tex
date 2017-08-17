@@ -1,0 +1,43 @@
+﻿\section{ANTLR 4}
+ANTLR 4 akceptuje jako dane wejściowe gramatykę bezkontekstową, która nie
+zawiera lewostronnej rekursji pośredniej lub ukrytej. \footnotemark[2]
+\footnotetext[2]{Pośrednio lewostronnie rekurencyjne reguły wołają siebie
+przez inną regułę; np., \(A \rightarrow B, B \rightarrow A \).
+Ukryta lewostronna rekurencja jest wtedy gdy pusta produkcja ujawnia lewostronną
+rekurencję; np., \(A \rightarrow BA, B \rightarrow \epsilon \)}
+Z tej gramatyki, ANTLR 4 generuje parser rekurencyjny, który korzysta z funkcji
+przewidywania produkcji ALL(*) (Część 3). ANTLR obecnie generuje parsery w Java
+i C{\#}.
+Gramatyka ANTLR 4 wykorzystuje składnię yacc z rozszerzonym BNF (EBNF),
+takim jak domknięcie Kleene'ego(*) i symbol literałów w pojedynczym cudzysłowie.
+Gramatyka zawiera zarówno leksykalne jak i składniowe reguły wraz ze specyfikacjami.
+ANTLR 4 generuje zarówno lekser jak i parser z połączonych specyfikacji.
+Używając pojedynczych znaków jako symboli wejściowych, gramatyka ANTLR 4
+może być bez skanera i tworzyć całość ponieważ języki ALL(*) są zamknięte
+w ramach unii (Twierdzenie 6.2), zapewniając korzyści płynące z modularności
+opisanej przez Grimm [10]. (W dalszej części ANTLR 4 jest określane jako ANTLR).
+\par
+Programiści mogą wstawiać akcje z efektami ubocznymi (mutatory),
+zapisywane językiem docelowym (np. w Javie). Działania mają dostęp do bieżącego
+stanu analizatora. Parser ignoruje mutatory podczas spekulacji,
+nie dopuszczając do „uruchomienia rakiety” spekulacyjnie.
+Działania zazwyczaj pozyskują informacje ze strumienia wejściowego
+i tworzą struktury danych.
+\par
+ANTLR obsługuje również semantyczne predykaty, które są wolnymi
+od efektów ubocznych wyrażeniami boolowskimi napisane w języku docelowym,
+które określają semantyczną wykonalność danej produkcji.
+Semantyczne predykaty, które przyjmują wartość false podczas analizy składniowej,
+określając produkcję niezdolną do wykonania, dynamicznie zmieniają
+język generowany przez gramatykę w czasie analizowania.\footnotemark[3]
+\footnotetext[3]{Poprzednie wersje ANTLR wspierały syntaktyczne predykaty
+aby pozbyć się przypadków niejednoznaczności gdzie statyczna analiza zawodziła;
+ta ustępliwość nie jest potrzebna w ANTLR4 z powodu dynamicznej analizy ALL(*).}
+Predykaty znacznie zwiększają moc strategii analizy składniowej, ponieważ
+predykaty mogą zbadać stos analizy i okoliczny kontekst wejściowy,
+aby zapewnić możliwość nieformalnej analizy kontekstowej.
+Semantyczne działania i predykaty zazwyczaj współpracują ze sobą, aby
+zmienić analizę składniową opartą o poprzednio odkryte informacje.
+Na przykład, gramatyka C może osadzić działania, aby zdefiniować typ symboli
+z konstrukcji, takich jak typedef int i32;, a predykaty aby rozróżnić nazwy
+typów od innych identyfikatorów w kolejnych definicjach, takich jak i32 x;.

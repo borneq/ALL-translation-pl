@@ -1,0 +1,29 @@
+﻿\subsection{Reguły eliminacji lewostronnej rekursji}
+Aby wyeliminować bezpośrednią lewostronną rekurencję w nie terminalach
+i rozwiążać niejednoznaczność ambiguities, ANTLR patrzy na cztery wzorce:
+\begin{enumerate}
+\item $A_i \rightarrow A\alpha_i A$ (operator binarny i ternarny)
+\item $A_i \rightarrow A\alpha_i$ (operator sufiksu)
+\item $A_i \rightarrow \alpha_iA$ (operator prefisku)
+\item $A_i \rightarrow \alpha_i$ (pierwotny lub “inny”)
+\end{enumerate}
+Indeks na prodkcji A_i , chwyta numer produkcji 
+w oryginalnej gramatyce kiedy potrzeba. Ukryta lub niebezpośrednia 
+lewostronna rekurencja skutkuje statycznymi błędami lewostronnej rekurencji w ANTLR.
+Procedura transformacji z G do G0 jest:
+\begin{enumerate}
+\item Pozbaw bezpośrednio lewostronnie rekurencyjnych  nieterminali odniesień
+\item Zgromadź prefiks, pierwotne produkcje do nowo utworzonego A'
+\item Zgromadź binarne, ternarne i sufiksowe produkcje to nowo utworzonego A''
+\item Produkcje prefiksowe w A'' z semantyką sprawdzania priorytetu predykat
+\{pr(i)>= pr\} gdzie pr(i) = \{n- i + 1\}
+\item Przepisz odniesienia A pośród binarnych, ternarnych, i prefiksowych produkcji
+jako A[nextpr(i, assoc)] gdzie
+nextpr(i, assoc) = \{assoc == left ? i + 1 : i\}
+\item Przepisz jakiekolwiek inne odnieisenia A w produkcji P
+(włączając A0 i A00) jako A[0]
+\item Przepisz oryginalną regułę A jako A[pr] $\rightarrow$ A'A''
+\end{enumerate}
+W praktyce ANTLR używa formy EBNF zamiast A'A''.
+
+

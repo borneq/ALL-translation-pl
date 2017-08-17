@@ -1,0 +1,43 @@
+﻿\subsection{Wykonywanie wielowątkowe}
+Aplikacje często wymagają rónoległego wykonania wielu wystąpień
+parsera, nawet dla tego samego języka. Na przykład, webowe
+aplikacje serwerowe parsują wiele przychodzących strumieni danych
+XML lub JSON używając wielu występień tego samego parsera. Dla
+wydajności pamięci, wszystkie parsery ALL(*) dla danego języka
+muszą dzielić lookahead DFA. Kod Java, który genruje
+ANTLR używa model pamięci dzielonej i wątków dla współbieżności,
+co oznacza że parsery muszą uaktualniać dzielone DFA
+w bezpieczny wątkowo sposób. Wiele wątków może symulować DFA
+podczas gdy inne wątki dodają stany i krawędzie do nich.
+Naszym celem jest bezpieczeństwo wątkowe, ale wielowątkowość
+również dostarcza małego przyśpieszenia przy konstrukcji DFA
+(obserowwane empirycznie).
+\par
+Kluczową sprawą  dla bezpieczeństwa wątkowego w Java podczas
+utrzymywania wysokiej wydajności jest unikanie nadmirnego blokowania
+(synchronizowane bloki) Są tylko dwie struktury, któe wymagają blokowania:
+Q - zbiór stanów DGA oraz $\Delta$ - zbiró krawędzi. Nasz implementacja
+rozkłada dodawanie stanów Q +=D' na funkcję addDFAState
+która czeka na blokowaniu na Q przed testowaniem stanu DFA
+na członkostwo lub dodaje stan, TO nie jest wąskie gardło
+ponieważ symulacja DFA możew wykonywać się podczas
+konstrukcji DFA bez blokowania ponieważ ona przechodzi
+krawędzie do wizytacji istniejących stanów DFA bez badania Q.
+\par
+Dodając krawędzi DFA do istniejącego stanu wymaga drobnoziarnistego
+blokowania, ale wyłącznie na takim specyficznym stanie DFA
+jak nasza implementacja utrzymuje tablicę krawędzi dla każdego
+staniu DFA, Pozwalamy na wielu czytających ale pojedynczego piszącego.
+Blokowanie przy testowaniu krawędzi jest niekonieczne nawet
+jeśli inny wątek ściga się ustawić tę krawędź.
+Jeśli krawędź $D\overset{a}{\rightarrow}D'$ istnieje, symulacja
+po prostu przechodzi do D'. JEśli symulacja nie znajduje istniejącej
+krawędzi, woła symulację ATN statując od D do obliczenia D' i wtedy
+ustawia element edge[a] dla D. Dwa wątki mogą znaleźć brakującą
+krawędź na a i obie wołać symulację ATN, ściagając się z dodaniem
+$D\overset{a}{\rightarrow}D'$.
+D' błoby teakie samo w obu przypadkach tak że tam nie ma hazardu
+tak długo jak specyficzna tablica krawędzi jest uaktualniana
+bezpiecznie z użyciem synchronizacji.
+Do napotkania spornego locka dwa lub więcej wątków symulacji ATN
+musi próbować dodać krawędź do tego samego stanu DFA.

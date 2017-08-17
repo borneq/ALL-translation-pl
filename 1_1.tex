@@ -1,0 +1,91 @@
+﻿\subsection{Dynamiczna analiza gramatyczna}
+W niniejszym artykule przedstawiliśmy ALL(*) czyli adaptacyjne LL(*) - parsery
+które łączą w sobie prostotę deterministycznych zstępujących parserów z
+siłą mechanizmów GLR odnośnie analizy decyzyjnej.
+W szczególności, analiza składniowa LL zawiesza działanie w każdym punkcie
+przewidywania decyzji (symbol nieterminalny), a następnie zostaje wznowiona
+po wyborze odpowiedniej produkcji do rozwinięcia przez mechanizm przewidywania.
+Kluczową innowacją jest nakierowanie analizy gramatycznej na czas analizy,
+nie jest tu potrzebna żadna statyczna analiza gramatyczna.
+Wybór ten pozwoli nam uniknąć nierozstrzygalności statycznej LL(*) w analizie
+gramatycznej i umożliwi wygenerowanie odpowiednich parserów (Twierdzenie 6.1)
+dla nie-lewostronnej rekursywnej bezkontekstowej gramatyki (CFG).
+Podczas gdy analiza statyczna musi uwzględniać wszystkie możliwe sekwencje
+wejściowe, analiza dynamiczna rozważa tylko skończony zbiór sekwencji
+wejściowych w rzeczywistości widoczny.
+\par
+Ideą mechanizmu przewidywania ALL(*) jest uruchomienie subparserów w punkcie
+decyzyjnym, jeden na alternatywą produkcję.
+Subparsery działają pseudo-równolegle odkrywając wszystkie możliwe ścieżki.
+„Wymierają” te subparsery których ścieżki nie dopasowują pozostałych
+danych wejściowych.
+Subparsery przechodzą przez dane wejściowe równym krokiem tak że analiza może
+zidentyfikować jedyny ocalały subparser na minimalnej głębokości podglądu
+symboli (lookahead) który jednoznacznie przewiduje produkcję.
+Jeśli wiele subparserów łączy się razem albo dochodzi do końca pliku, predyktor
+ogłasza niejednoznaczność i rozwiązuje to na korzyść produkcji o najniższym
+numerze powiązanej z ocalałym subparserem.
+(Produkcje są numerowane co w automatyczny sposób określa pierwszeństwo
+rozwiązując niejednoznaczności, niczym PEG; Bizon również rozwiązuje konflikty
+wybierając produkcję określoną jako pierwszą).
+Programiści mogą również wstawiać semantyczne predyktory [22], aby wybrać
+między niejednoznacznymi interpretacjami.
+\par
+Parsery ALL(*) zapamiętują wyniki analizy, stopniowo i dynamicznie budując
+cache automatów DFA, która mapuje frazy lookahead do przewidzianych produkcji.
+(Wykorzystujemy termin analiza w tym sensie że analiza ALL(*) przynosi
+lookahead DFA jak statyczna analiza LL(*)).
+Analizator może tworzyć przyszłe przewidywania w takiej samej decyzji
+analizatora i frazy lookahead poprzez zapoznanie się z cache.
+Nieznane frazy wejściowe uruchamiają mechanizm analizy gramatycznej,
+jednocześnie przewidując alternatywę i uaktualniając DFA.
+DFA są odpowiednie dla wyników przewidywania, pomimo faktu że język lookahead
+przy danej decyzji zazwyczaj tworzy język bezkontekstowy.
+Analiza dynamiczna musi tylko uwzględniać skończone podzbiory języka
+bezkontekstowego napotkane podczas przeprowadzania analizy składniowej,
+a jakikolwiek skończony zbiór jest regularny.
+\par
+Aby uniknąć wykładniczej natury niedeterministycznych subparserów,
+przewidywanie wykorzystuje graph-structured stack (GSS) [25] w celu uniknięcia
+zbędnych obliczeń.
+GLR wykorzystuje zasadniczo tą samą strategię, jednakże ALL(*) przewiduje tylko
+produkcje z takimi subparserami, natomiast GLR faktycznie przeprowadza analizę
+składniową z nimi.
+Wskutek tego, GLR muszą wkładać symbole terminalne na GSS, czego ALL(*) nie robi.
+\par
+Parsery ALL(*) dopasowują symbole terminalne i rozwijają nieterminalne z
+prostotą LL, jednakże posiadają teoretyczną złożoność czasową O($n^4$)
+(Twierdzenie 6.3), ponieważ w najgorszym przypadku, parser musi przewidywać
+przy każdym symbolu wejściowym, a każde przewidywanie musi analizować pozostałe
+dane wejściowe; badanie symbolu wejściowego może być kosztowne O($n^2$).
+O($n^4$) jest zgodne ze złożonością GLR.
+W Części 7, przedstawiono empirycznie, że parsery ALL(*) dla rozpowszechnionych
+języków są efektywne i wykazują w praktyce zachowanie linearne.
+\par
+Zalety ALL(*) wynikają z przeniesienia analizy gramatycznej do czasu parsowania,
+ale wybór ten powoduje dodatkowe obciążenie na funkcjonalne testowanie.
+Podobnie jak w przypadku wszystkich metod dynamicznych, programiści muszą
+pokryć tyle samo pozycji gramatycznych i kombinacji sekwencji wejściowych,
+aby możliwe było znalezienie niejednoznaczności gramatycznej.
+Standardowe narzędzia pokrycia kodu źródłowego mogą pomóc programistom zmierzyć
+pokrycie gramatyczne dla parserów ALL(*).
+Wysokie pokrycie w wygenerowanym kodzie odpowiada wysokiemu pokryciu gramatycznemu.
+\par
+Algorytm ALL(*) jest podstawą generatora parserów ANTLR 4 (ANTLR 3 opiera się na LL(*)).
+ANTLR 4 został wypuszczony w styczniu 2013 i dostaje ok. 5000 pobrań miesięcznie
+(źródła, binaria, albo środowisko ANTLRworks2, licząc wejścia nie botów w
+logach z unikatowych adresach IP).
+Taka aktywność dostarcza dowodów, że ALL(*) jest przydatny i użyteczny.
+\par
+Pozostała część artykułu uwzględnia następujące tematy: Po pierwsze,
+przedstawiliśmy generator parserów ANTLR 4 (Sekcja 2) i omówiliśmy strategię
+analizy składniowej ALL(*) (Sekcja 3).
+Następnie, określiliśmy predykatywną gramatykę, ich rozszerzone sieci przejść,
+oraz lookahead DFA (Sekcja 4).
+Kolejno, opisaliśmy analizę gramatyczną ALL(*) i przedstawiliśmy algorytm
+analizy składniowej (Sekcja 5).
+Ostatecznie, wspomagamy się twierdzeniami dotyczącymi poprawności (Sekcja 6)
+i wydajności ALL(*) (Sekcja 7), oraz zbadaliśmy powiązane prace (Sekcja 8).
+Załącznik A uwzględnia dowody dla twierdzenia ALL(*), Załącznik B opisuje
+pragmatykę algorytmu, Załącznik C uwzględnia lewostronne rekursywne
+szczegóły eliminacyjne. 

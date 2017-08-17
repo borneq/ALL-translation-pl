@@ -1,0 +1,24 @@
+digraph Figure3 {
+        rankdir=LR;
+P0 [label = < >]
+P1 [label = <p>]
+P2 [label = <q>]
+P3 [label = < >]
+P4 [label = < >]
+P5 [label = < >]
+P6 [label = < >]
+P7 [label = < >]
+P8 [label = < >]
+P9 [label = < >; shape = doublecircle]
+
+P0->P1 [ label = <&epsilon;>; weight = 2 ]
+P0->P2 [ label = <&epsilon;>; weight = 2 ]
+P1->P3 [ label = <expr>; weight = 2 ]
+P2->P4 [ label = <expr>; weight = 2 ]
+P3->P5 [ label = <'='>; weight = 2 ]
+P4->P6 [ label = <';'>; weight = 2 ]
+P5->P7 [ label = <expr>; weight = 2 ]
+P7->P8 [ label = <';'>; weight = 2 ]
+P8->P9 [ label = <&epsilon;>; weight = 2 ]
+P6->P9 [ label = <&epsilon;>; weight = 1 ]
+}

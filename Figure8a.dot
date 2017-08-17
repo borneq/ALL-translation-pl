@@ -1,0 +1,20 @@
+digraph Figure8a {
+        rankdir=LR;
+PS [label = <p<SUB>S</SUB>>]
+PS1 [label = <p<sub>S,1</sub>>]
+PS2 [label = <p<sub>S,2</sub>>]
+P1 [label = <p<sub>1</sub>>]
+P2 [label = <p<sub>2</sub>>]
+P3 [label = <p<sub>3</sub>>]
+P4 [label = <p<sub>4</sub>>]
+PF [label = <p'<sub>S</sub>>; shape = doublecircle]
+
+PS->PS1 [ label = <&epsilon;> ]
+PS->PS2 [ label = <&epsilon;> ]
+PS1->P1 [ label = <A> ]
+PS2->P3 [ label = <A> ]
+P1->P2 [ label = <c> ]
+P3->P4 [ label = <d> ]
+P2->PF [ label = <&epsilon;> ]
+P4->PF [ label = <&epsilon;> ]
+}

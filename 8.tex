@@ -1,0 +1,74 @@
+﻿\section{Powiązane prace}
+Przez dekady pracowano w kierunku zwiększenia
+siły rozpoznawania recognition wydajnych ale nie ogólnych
+parserów LL i LR i zwiększenia wydajności ogólnych algorytmów
+Earleya O(n3) [8]. Parr [21] i Charles [4] statystycznie generowane parsery LL(k) i LR(k)
+dla k > 1. Parr i Fisher’s LL(*) [20] i Bermudez i Schimpf’s LAR(m) [2]
+statystycznie liczone parsery LL i LR wzbogacone o cykliczny
+DFA który mógł badać dowolną ilość podglądanych symboli. Te
+parsery bazowały na parserach LL-regular [12] i LR-regular [7]
+które miały niepożądaną właściwość bycia nierozstrzygalnym w ogólności.
+Wprowadzenia algorytmu z nawrotami(backtrackingu) dramatycznie zwiększyło się rozpoznawania
+i uniknięto kwestii nierozstrzygalności statycznej analizy gramatyki
+ale jest niepożądane ponieważ osadzone mutatory redukowały wydajność
+i komplikowały debugowanie krok po kroku. parsery Packrat (PEGs) [9] próbowały decyzji
+produkcji w kolejności I wybierały pierwszą która dawała sukces. PEG są
+O(n) ponieważ one pamiętają częściowy rezultat parsowania ale cierpią
+na aberrację a | ab gdzie ab jest milcząco nie brane pod uwagę.
+\par
+Aby zwiększyć ogólną wydajność parsowania, Tomita [26] wprowadził GLR, ogólny algorytm
+bazujący na LR(k) który konceptualnie forkuje subparsery dla każdego stanu
+LR(k) z konfliktem w czasie parsowania to badania wszystkich możliwych ścieżek.
+Tomita pokazuje że GLR jest 5x-10x szybszy niż Earley. Kluczowy komponent
+parsowania GLR jest graph-structured stack (GSS) [26] który zapobiega parsowaniu
+tego samego wejścia dwukrotnie w ten sam sposób.
+(GLR wkłada symbole wejściowe i stany LR na GSS podczas gdy ALL(*) wkłada stany ATN)
+Elkhound [18] wprowadził hybrydowe parsery GLR które używają pojedynczy stos
+dla wszystkich decyzji LR(1) a GSS kiedy niezbędne jest dopasowanie
+niejednoznacznych porcji wejścia. (Zobaczyliśmy że parsery Elkhounda
+są szybsze niż inne GLR.) GLL [25] jest analogiem LL parserów GLR
+i również używa subparserów i GSS do badania wszystkich możliwych ścieżek;
+GLL używa lookahead k = 1 gdzie można dla wydajności.
+GLL jest O(n3) a GLR jest O(np+1)
+gdzie p jest długością najdłuższej produkcji gramatyczne.
+\par
+Parsery Earleya skalują się dobrze od  O(n) dla deterministycznych gramatyk
+do O(n3) dla niejednoznacznych gramatyk ale wydajność
+nie jest dość dobra w ogólnym użyciu.
+LR(k) maszyny stanów mogą polepszyć wydajność takich parserów
+prze statystyczne obliczanie tak dużo jak to możliwe. LRE [16] jest jednym
+takim przypadkiem. Mimo tych optymizacji ogólne algorytmy pozostają
+bardzo wolne w porównaniu do deterministycznych parserów wzbogaconych
+o głęboki podgląd symboli.
+\par
+Problem z dowolną liczbą podglądanych symboli jest taki że jest niemożliwe
+wyliczyć statystycznie dla wielu użytecznych gramatyk (warunek LLregular jest nierozstrzygalny.) Przez przeniesienie analizy podglądanych symboli do czasu analizy ALL(*) zdobył siłę do obsługi jakiejkolwiek gramatyki bez lewostronnej rekurencji ponieważ może uruchomić subparsery do określenia jaka ścieżka prowadzi to poprawnego parsowania. Inaczej niż GLR,
+spekulacja zatrzymuje się kiedy wszystkie pozostałe subparsery są powiązane z pojedynczą alternatywą a produkcji, tak więc wyliczając minimalną sekwencję podglądanych symboli.. Aby zyskać wydajność, ALL(*) zapamiętuje mapowanie z tej sekwencji lookahead to przewidzianej produkcji używając DFA dla użycia przez kolejne decyzje.
+Podzbiory języka bezkontekstowego napotykane podczas parsowania są skończone i dlatego języki ALL(*) lookahead są regularne.
+Ancona et al [1] również wykonują analizę czasu parsowania ale oni
+jedynie obliczają stały lookahead LR(k) i nie adaptują do faktycznego wejścia jak to robi ALL(*).
+Perlin [23] działa na RTN jak ALL(*) ale oblicza  lookahead k = 1 podczas parsowania.
+\par
+ALL(*) jest podobne do Earley w tym że obydwa są top-down i
+operują na reprezentacji gramatyki w czasie parsowania ale
+Earley parsuje nie licząc lookahead DFA. W tym sensie,
+Earley nie wykonuje analizy gramatycznej, Earley również nie zarządza jawnie
+GSS podczas parsowania. Zamiast tego element w stanach Earleya
+mają “wskaźniki rodzica” które odnoszą się do innych stanów
+kiedy są w wątku razem
+Operacja SCANNER Earleya
+koresponduje do funkcji ALL(*) move. Operacje PREDICTOR i COMPLETER
+korespondują do push i pop in funkcji closure ALL(*)
+Stan Earleya jest zbiorem wszystkich konfiguracji parsera osiągalnych
+w pewnej absolutnej głębokości wejścia podczas gdy stan DFA ALL(*) jest zbiorem konfiguracji
+osiągalnych z głębokości podglądu relatywnej do bieżącej decyzji
+Inaczej niż w kompletnie ogólnych algorytmach, ALL(*) wyszukuje
+pojedyncze parsowanie wejścia, które pozwala użyć wydajnego stosu LL podczas parsowania.
+\par
+Strategie parsowania które ciągle spekulują lub wspomagają niejednoznaczność
+mają trudności z mutatorami ponieważ ciężko wtedy o cofnięcie działania.
+Brak mutatorów redukuje ogólność semantycznych predykatów które zmieniają parsowanie ponieważ nie można testować dowolnie stanu obliczonego wcześniej podczas parsowania.
+Rats! [10] wspomaga ścisłe semantyczne predykaty a Yakker [13] wspomaga
+semantyczne predykaty które są funkcjami poprzednio parsowanych symboli terminalnych.
+Ponieważ ALL(*) nie spekuluje podczas faktycznego parsowania, wspomaga dowolne mutatory i semantyczne predykaty..
+Miejsce wyklucza bardziej szczegółowe dyskusje o powiązanych pracach; bardziej szczegółowa analiza może być znaleziona w [20].

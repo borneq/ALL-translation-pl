@@ -1,0 +1,82 @@
+﻿\input{headerA4.tex}
+\usepackage{amssymb}
+\usepackage{tocloft}
+\usepackage{minibox}
+\usepackage{listings}
+\newcommand\tab[1][0.15in]{\hspace*{#1}}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{enumitem}
+\setlist[enumerate]{itemsep=0mm}
+\setlist[itemize]{itemsep=0mm}
+
+\begin{document}
+\onehalfspacing
+
+%+Title
+\title{Adaptacyjny parsing LL(*): moc dynamicznej analizy }
+\author{ Terence Parr, University of San Francisco, parrt@cs.usfca.edu \and  Sam Harwell, University of Texas at Austin, samharwell@utexas.edu \and  Kathleen Fisher, Tufts University, ksher@eecs.tufts.edu}
+\date{10 listopada 2016}
+\maketitle
+%-Title
+
+\def\chapabshead%
+{%
+  \typeout{Abstract}
+  \centerline{\bf Abstract}
+  \addcontentsline{toc}{section}{Abstract}
+  \singlespacing
+  \baselineskip=14pt
+  \noindent
+}% End \chapabshead
+
+\begin{translation}
+Tłumaczenie na język polski: Andrzej Borucki; oryginalny dokument `Adaptive LL(*) Parsing: The Power of Dynamic Analysis`
+\center\href{http://www.antlr.org/papers/allstar-techreport.pdf}{http://www.antlr.org/papers/allstar-techreport.pdf}
+\end{translation}
+
+%+Abstract
+\begin{abstract}
+    Pomimo postępów wprowadzanych przez nowoczesne strategie analizy składniowej, takie jak PEG, LL(*), GLR, i GLL, analiza składniowa nadal pozostaje nierozwiązanym problemem. Istniejące podejścia cierpią na szereg niedociągnięć, w tym trudności wspierające efekty uboczne akcji osadzonych, powolność i/lub nieprzewidywalną wydajność, oraz sprzeczne strategie dopasowania. Artykuł ten przedstawia strategię analizy składniowej ALL(*), która łączy w sobie prostotę, skuteczność i przewidywalność konwencjonalnych zstępujących parserów LL(k) z siłą mechanizmów GLR odnośnie analizy decyzyjnej. Kluczową innowacją jest nakierowanie analizy gramatycznej na działanie podczas czasu parsowania, która umożliwia ALL(*) obsługę wszelkiej nielewostronnie rekurencyjnej bezkontekstowej gramatyki. ALL(*) ma złożoność czasu parsowania teoretycznie O(n4), ale konsekwentnie działa liniowo na gramatykach wykorzystywanych w praktyce, wyprzedzając ogólne strategie, takie jak GLL i GLR o rzędy wielkości. ANTLR 4 generuje parsery ALL(*) i obsługuje bezpośrednią lewostronną rekurencję poprzez przepisanie gramatyki. Powszechne stosowanie ANTLR 4 (5000 pobrań miesięcznie w 2013) dostarcza dowodów, że ALL(*) jest skuteczne dla szerokiej gamy zastosowań.
+\end{abstract}
+%-Abstract
+
+%+Contents
+\tableofcontents
+%-Contents
+\input{1.tex}
+\input{1_1.tex}
+\input{2.tex}
+\input{2_1.tex}
+\input{2_2.tex}
+\input{2_3.tex}
+\input{3.tex}
+\input{3_1.tex}
+\input{3_2.tex}
+\input{4.tex}
+\input{4_1.tex}
+\input{4_2.tex}
+\input{4_3.tex}
+\input{4_4.tex}
+\input{5.tex}
+\input{5_1.tex}
+\input{5_2.tex}
+\input{5_3.tex}
+\input{5_4.tex}
+\input{6.tex}
+\input{7.tex}
+\input{7_1.tex}
+\input{7_2.tex}
+\input{7_3.tex}
+\input{7_4.tex}
+\input{8.tex}
+\input{Bibliography.tex}
+\appendix
+\input{A.tex}
+\input{B.tex}
+\input{B_1.tex}
+\input{B_2.tex}
+\input{B_3.tex}
+\input{B_4.tex}
+\input{C.tex}
+\input{C_1.tex}
+\end{document}

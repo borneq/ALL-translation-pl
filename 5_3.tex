@@ -1,0 +1,91 @@
+﻿\subsection{Detekcja konfliktu i niejednoznaczności}
+Pojęcie sprzecznych konfiguracji ma kluczowe znaczenie dla analizy ALL(*).
+Konflikty wywołują pracę awaryjną w pełnym przewidywaniu LL podczas przewidywania
+SLL i wskazują na niejednoznaczność podczas przewidywania LL.
+Wystarczającym warunkiem konfliktu między konfiguracjami jest, gdy różnią się
+tylko w przewidzianej alternatywie: $(p, i, \Gamma)$ oraz $(p, j, \Gamma)$.
+Wykrywanie konfliktów jest wspomagane przez dwie funkcje.
+Pierwsza, \textit{getConflictSetsPerLoc} (Funkcja 8) zbiera zbiory numerów produkcji powiązanych
+z wszystkimi konfiguracjami $(p, -, \Gamma)$.
+Jeśli para p,$\Gamma$ przewiduje więcej niż jedną produkcję, wówczas występuje konflikt.
+Poniżej przykład zbioru konfiguracji i powiązanego zbioru konfliktu:
+\par
+\{$\underbrace{(p,1,\Gamma),(p,2,\Gamma),(p,3,\Gamma)}_{1,2,3},
+\underbrace{(p,1,\Gamma'),(p,2,\Gamma')}_{1,2},\underbrace{(r,2,\Gamma'')}_{2}$\}
+\\
+Te zbiory konfliktów wskazują, że lokalizacja p,$\Gamma$ jest osiągalna z produkcji {1, 2, 3},
+lokalizacja p,$\Gamma'$ jest osiągalna z produkcji {1, 2},
+a lokalizacja r,$\Gamma''$ jest osiągalna z produkcji {2}.
+\\
+\minibox[frame]{//Dla każdego p,$\Gamma$ daj zbiór alts(i) z (p,-,$\Gamma$) $\in$ konfiruracji D\\
+\textbf{Function 8}:getConflictSetsPerLoc(D) \textbf{returns} zbiór zbiorów\\
+s:=$\varnothing$;\\
+\textbf{for} (p,-,$\Gamma$) $in$ D \textbf{do} prods:=\{i|(p,i,$\Gamma$)\}; s:=s $\cup$ prods;\\
+\textbf{return} s;
+}
+\par
+Druga funkcja, \textit{getProdSetsPerState} (Funkcja 9), jest podobna, ale zbiera numery
+produkcji powiązane tylko ze stanem p ATN.
+Dla takiego samego zbioru konfiguracji, \textit{getProdSetsPerState} oblicza następujące zbory konfliktu:
+\par
+\{$\underbrace{(p,1,\Gamma),(p,2,\Gamma),(p,3,\Gamma),(p,1,\Gamma'),(p,2,\Gamma')}_{1,2,3},
+\underbrace{(r,2,\Gamma'')}_{2}$\}
+\par
+Wystarczający warunek dla niepowodzenia w przewidywaniu LL (\textit{LLpredict})
+z SLL mógłby wystąpić w przypadku, gdy jest przynajmniej jeden zbiór sprzecznych konfiguracji:
+\textit{getConflictSetsPerLoc} zwraca co najmniej jeden zbiór z więcej niż jedną liczbą produkcji.
+Np. konfiguracje $(p, i, \Gamma)$ i $(p, j, \Gamma)$ występują w parametrze D.
+Jednak naszym celem jest kontynuowanie przy użyciu przewidywania SLL tak długo,
+jak to tylko możliwe, ponieważ przewidywanie SLL aktualizuje cache lookahead DFA.
+W tym celu, przewidywanie SLL postępuje, jeśli występuje przynajmniej jedna konfiguracja
+niesprzeczna (gdy \textit{getProdSetsPerState} zwraca co najmniej jeden zbiór wielkości 1).
+Mając nadzieję, że więcej lookahead doprowadzi do zbioru konfiguracji,
+który przewiduje jednoznaczną produkcję za pośrednictwem niesprzecznych konfiguracji.
+Na przykład, decyzja dla $S \rightarrow a|a|a \cdot_p b$ jest niejednoznaczna względem $a$
+pomiędzy produkcjami 1 i 2, jednakże jest jednoznaczna względem ab.
+(Lokalizacja $\cdot_p$ jest stanem ATN między a i b.)
+Po dopasowaniu danych wejściowych a,
+zbiór konfiguracji wyglądałby następująco \{$(p'_S, 1, []), (p'_S, 2, []), (p, 3, [])$\}.
+Funkcja \textit{getConflictSetsPerLoc} zwraca \{\{1, 2\}, \{3\}\}.
+Następnie \textit{move-closure} względem $b$ prowadzi do zbioru konfiguracji
+niesprzecznych \{($p'_S$, 3, [])\} z (p, 3, []), omijając konflikt.
+W przypadku gdy wszystkie zwrócone zbiory z \textit{getConflictSetsPerLoc} przewidują więcej
+niż jedną alternatywę, żadna ilość lookahead nie doprowadzi do jednoznacznego przewidywania.
+Analiza musi zostać wznowiona ponownie ze stosem wywołań $\gamma_0$ za pośrednictwem LLpredict.
+\\
+\minibox[frame]{//Dla każdego p daj zbiór alts(i) z (p,-,-) $\in$ konfiruracji D\\
+\textbf{Function 9}:getProdSetsPerState(D) \textbf{returns} zbiór zbiorów\\
+s:=$\varnothing$;\\
+\textbf{for} (p,-,-) $in$ D \textbf{do} prods:=\{i|(p,i,-)\}; s:=s $\cup$ prods;\\
+\textbf{return} s;
+}
+\par
+Konflikty podczas symulacji LL są niejednoznacznościami i występują gdy każdy
+zbiór konfliktu z \textit{getConflictSetsPerLoc} zawiera więcej niż 1 produkcję – każda lokalizacja
+w D jest osiągalna z więcej niż 1 produkcją.
+Gdy tylko wiele subparserów osiągnie to samo $(p, -, \Gamma)$ wszystkie przyszłe
+symulacje wyprowadzone z $(p, -, \Gamma)$ będą zachowywać się identycznie.
+Więcej lookahead nie rozwiąże niejednoznaczności.
+Przewidywanie może zostać przerwane w tym momencie i zaraportować lookahead przedrostka
+$u$ jako niejednoznaczne, jednakże LLpredict nadal postępuje aż się upewni
+\textbf{która} produkcja $u$ jest niejednoznaczna.
+Należy wziąć pod uwagę zbiory konfliktu \{1,2,3\} oraz \{2,3\}.
+Ponieważ oba mają więcej niż jeden stopień, zbiory te reprezentują niejednoznaczność,
+jednakże dodatkowe dane wejściowe będą identyfikować czy $u \preceq w_r$ jest niejednoznaczne
+względem \{1,2,3\} czy \{2,3\}.
+Funkcja \textit{LLpredict} postępuje aż wszystkie zbiory konfliktu, które identyfikują niejasności
+będą równe; warunek x = y oraz |x| > 1  $\forall x,y \in altsets$ odzwierciedla ten test.
+\par
+W celu wykrycia konfliktów, algorytm porównuje grafowo-strukturalne stosy często.
+Technicznie konflikt występuje gdy konfiguracje $(p, i, \Gamma)$ i $(p, j, \Gamma')$
+występują w tym samym zbiorze konfiguracji z $i \neq j$ oraz przynajmniej jednym
+śladem stosu zarówno dla $\Gamma$ jak i $\Gamma'$.
+Z faktu iż weryfikacja pod kątem przecięć grafu jest kosztowna, algorytm wykorzystuje
+regułę równości, $\Gamma = \Gamma'$, jako metodę heurystyczną.
+Równość jest znacznie szybsza ze względu na wspólne podgrafy.
+Wykres algorytmu równości często może sprawdzać identyczność węzła do porównywania dwóch
+całych podgrafów. W najgorszym przypadku, równość kontra podzbiór heurystycznie opóźnia
+wykrycie konfliktu aż GSS między sprzecznymi konfiguracjami będzie prostymi liniowymi stosami,
+gdzie przecięcie grafów jest takie same jak graf równości.
+Kosztem tej heurystyki jest głębszy lookahead.
+

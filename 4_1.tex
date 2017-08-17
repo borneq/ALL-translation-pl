@@ -1,0 +1,49 @@
+﻿\subsection{Gramatyka predykatowa}
+Aby przeprowadzić formalny proces analizy składniowej ALL(*), najpierw należy formalnie
+określić gramatykę predykatową z której jest ona czerpana.
+Gramatyka predykatowa \(G = (N, T, P, S, \Pi, \mathcal{M})\) składa się z następujących elementów: 
+\begin{itemize}
+\item N jest zbiorem nie-terminali (nazwy reguł) 
+\item T jest zbiorem terminali (symboli) 
+\item P jest zbiorem produkcji 
+\item \(S \in N\) jest symbolem początkowym 
+\item \( \Pi \) jest zbiorem efektów ubocznych semantycznych predykatów
+\item \(\mathcal{M}\) jest zbiorem działań (mutatorów) 
+\end{itemize}
+Gramatyki predykatowe ALL(*) różnią się od tych z LL(*) [20] jedynie tym że
+gramatyka ALL(*) nie potrzebuje albo nie obsługuje składni predykatów.
+Gramatyki predykatowe w formalnych częściach niniejszego dokumentu używają
+notacji przedstawionej na Rysunku 5.
+Zasady wyprowadzania na Rysunku 6 określają znaczenie gramatyki predykatowej.
+Do obsługi semantycznych predykatów i mutatorów, zasady odnoszą się do stanu S,
+który abstrahuje stan użytkownika podczas analizowania.
+Przejście \(( \mathbb{S}, \alpha) \Rightarrow ( \mathbb{S'}, \beta) \)
+może zostać odczytane: „W stanie S maszyny, sekwencja gramatyczna \(\alpha\)
+redukuje się w jednym kroku do zmodyfikowanego stanu S' i sekwencji gramatycznej \(\beta\)”.
+Przejście \((\mathbb{S}, \alpha) \Rightarrow^* (\mathbb{S'}, \beta)\)
+oznacza wielokrotne zastosowanie jednostopniowej zasady redukcji.
+Te zasady redukcji określają wyprowadzenie lewostronne.
+Produkcja z semantycznym predykatem \(\pi_i\) jest wykonalna tylko wtedy,
+gdy \(\pi_i\) jest true z bieżącym stanem \(\mathbb{S}\).
+Na koniec akcja produkcji używa określonego mutatora \(\mu_i\) aby zaktualizować stan.
+\par
+Formalnie, język generowany przez sekwencję gramatyczną \(\alpha\)
+w stanie użytkownika \(\mathbb{S}\)
+jest \(L(\mathbb{S},\alpha) = \{w| (\mathbb{S},\alpha)\Rightarrow^*(\mathbb{S'},w)\} \)
+a język gramatyki G jest \(L(\mathbb{S}_0,G) = \{w| (\mathbb{S}_0,S)\Rightarrow^*(\mathbb{S},w)\} \)
+dla początkowego stanu \(\mathbb{S}_0\) użytkownika (\(\mathbb{S}_0\) może być puste).
+Jeśli \(\mu\) jest przedrostkiem \(w\) albo równe \(w\), zapisujemy \(\mu \preceq w\).
+Język L jest ALL(*) wtedy i tylko wtedy jeśli występuje gramatyka ALL(*) dla L.
+Teoretycznie, klasa języka L(G) jest rekurencyjnie przeliczalna,
+ponieważ każdy mutator może być maszyną Turinga.
+W rzeczywistości, autorzy gramatyki nie wykorzystują tego ogólnika,
+tak więc jest to przyjęty sposób postępowania do rozważenia klasy języka,
+zamiast kontekstowego języka. Klasa jest zależna od kontekstu, a nie bezkontekstowa,
+ponieważ predykaty mogą badać stos wywołań i terminale z lewej i prawej.
+\par
+Ten formalizm uwzględnia różne składniowe ograniczenia, które nie są obecne w rzeczywistej
+gramatyce ANTLR, na przykład zmuszając mutatory do ich własnych zasad i wykluczając
+powszechne notacje Rozszerzonego (Extended) BNF (EBNF),
+takie jak domknięcia \(\alpha^*\) i \(\alpha^+\).
+Możemy ustalić te ograniczenia bez utraty ogólnika, ponieważ jakakolwiek
+gramatyka w ogólnej formie może przekładać się na bardziej ograniczoną formę. 

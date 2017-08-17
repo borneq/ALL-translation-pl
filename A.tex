@@ -1,0 +1,168 @@
+﻿\section{Analiza poprawności i złożoności}
+\textbf{Twierdzenie A.1.} Języki ALL(*) są zamknięte w pod unią.
+\\ \\
+Dowód. Niech predykowalne gramatyki $G_1 = (N_1, T, P_1, S_1, \Pi_1,\mathcal{M}_1)$
+i $G_2 = (N_2, T, P_2, S_2, \Pi_1,\mathcal{M}_1)$ opisują odpowiednio L($G_1$) i L($G_2$).
+Dla stosowalności zarówno do parserów jak i parserów bezskanerowych
+przyjmijmy że przestrzeń terinali T jest zbiorem poprawnych znaków.
+Przyjmijmy że  $N1 \cap N2 = \varnothing$ przez przezwanie nieterinali
+w razie potrzeby.
+Przyjmijmy że predykaty i mutatory $G_1$ i
+$G_2$ działają w rozłącznych środowiskach $S_1$ and $S_2$.
+Konstruujmy:
+\\ \\
+$G' = (N_1 \cup N_2, T, P_1 \cup P_2, S',\Pi_1 \cup \Pi_2,\mathcal{M}_1 \cup \mathcal{M}_2)$
+\\ \\
+z S' = $S_1 | S_2$. Wtedy L(G') = $L(G_1) \cup L(G_2)$.
+\\ \\
+\textbf{Lemat A.1.} Parser ALL(*) dla nie lewostronnie rekurencyjnej G z
+deaktywowanym lookahead DFA rozpoznaje zdanie wtedy i tylko wtedy gdy  $w \in L(G)$.
+\\ \\
+Dowód. ATN dla G rozpoznaje $w$ wtedy i tylko wtedy gdy $w \in L(G)$.
+Dlatego możemy równoważnie dowieść że ALL(*) jest
+wierną implementacją ATN. Bez lookahead DFA predykcja jest
+prostą symulacją ATN: zstępujący parser który podejmuje
+dokładne decyzje parsowania używając GLR-podobnych podparserów które
+mogą badać cały pozostały input i wołanie stosu podmaszyn ATN.
+\\ \\
+\textbf{Twierdzenie A.2.} (Poprawność). Parser ALL(*) dla nie lewostronnie
+rekurencyjnej G rozpoznaje zdanie $w$ wtedy i tylko wtedy gdy $w \in L(G)$.
+\\ \\
+Dowód. Lemat A.1 pokazuje że parser ALL(*) poprawnie rozpoznaje
+$w$ bez cache DFA. Istotą dowodu
+następnie jest pokazać że adaptywny lookahead ALL(*) DFA nie
+psuje parsowania dając inną decyzję predykcji niż
+prosta symulacja ATN. Potrzebujemy jedynie rozważyć
+przypadek nieprzewidującego parsingu SLL jak ALL(*)
+jedynie only buforuje w cache rezulaty decyzji w tym przypadku.
+\par
+przypadek "wtedy": Przez indukcję na stanie lookahead DFA dla
+dowolnie danej decyzji A. Przypadek podstawowy.
+Pierwsza predykcja dla A zaczyna się
+pustym DFA i musi aktywować symulację ATN do
+wybrania alternatywy $\alpha_i$ używając prefisku $u \preceq w_r$.
+Skoro symulacja ATN
+daje właściwe przewidywania, parser ALL(*) poprawnie przewiduje
+$\alpha_i$ na starcie i następnie zapisuje mapowanie u : i
+w DFA. Jeśli jest tam pojedyncza wykonalna alternatywa, $i$ jest
+związanym z nią numerem produkcji.
+Jeśli symulacja znajduje ATN wiele wykonalnych alternatyw,
+i jest minimalnym numerem produkcji związanych
+z alternatywami z tego zbioru.
+\par
+Krok indukcji. Przyjmijmy że lookahead DFA poprawnie przewiduje
+produkcje dla każdego prefiksu $u$ z $w_r$ widzoanego przez parser
+w A. Muismy pokazać że startując z istniejaćego DFA, ALL(*)
+właściwie doda ścieżkę przez DFA dla nieznanego prefiksu $u$
+z $w'_r$. Mamy kilka przypadków:
+\begin{enumerate}
+\item $u \preceq w'_r$ i $u \preceq w_r$ dla poprzedniego $w_r$.
+Lookahead DFA daje poprawną odpowiedź dla $u$ przez założenie indukcyjne.
+DFA jest nie uaktualniane.
+\item $w'_r = bx$ i wszystkie poprzednie $w_r = ay$ dla pewnego $a \neq b$.
+Ten przypadek redukuje się do podstawoewego przypadku zimnego startu
+ponieważ nie mam tam krawędzi
+$D_0 \overset{b}{\rightarrow}D$.
+Symulacja ATN przewiduje $\alpha_i$ i ododaje ściężkę
+dla $u \preceq w'_r$ z $D_0 do f_i$.
+\item $w'_r = vax$ i $w_r = vby$ dla pewnego poprzednio widzianego
+$w_r$ ze wspólnym prefiksem $v$ i $a \neq b$.
+Symulacja DFA osiągnie D z $D_0$ dla wejścia v.
+D ma krawędź dla $b$ ale nie $a$.
+Symulacja ATN przewidzi $\alpha_i$ i wzbogaci DFA, startując z
+krawędzi na $a$ z $D$ prowadząc ostatecznie do $f_i$.
+\end{enumerate}
+\par
+przypadek "tylko wtedy": Parser ALL(*) zgłasza błąd składni dla
+$w \notin L(G)$. Przyjmijmy odwrotnie, że parser z sukcesem
+parsuje $w$. To pociąga za sobą że istnieje sekwencja wyprowadzająca
+konfigurację ATN
+$(\mathbb{S}, p_S, [], w) \rightarrow_* (\mathbb{S}, p'_S, [], \epsilon)$
+dla $w$
+przez odpowiadajcy G ATN. Ale to wymagało by $w \in
+L(G)$, z Definicji ??. Dlatego parser ALL(*) zgłasza
+błąd składni dla w. Dokładność lookahead cache ALL(*)
+jest bez znaczenia ponieważ nie ma możliwej ścieżki przez ATN
+lub parser.
+\\ \\
+\textbf{Lemat A.2.} Zbiór wykonalnych produkcji dla LL jest zawsze
+podzbiorem wykonalnych produkcji SLL dla danej decyzji A i
+pozostałego wejściowego ciągu $w_r$.
+\\ \\
+Dowód. Jeśli kluczowa operacja analizy move-closure nie
+osiągnie stanu stop $p'_A$ dla podmaszyny A, SLL i LL postępują
+identycznie i dzielą ten sam zbiór wykonalnych produkcji.
+\par
+Jeśli closure osiągnie stan stopu dla reguły wejściowej decyzji,
+$p'_A$, tam są konfiguracje w formie $(p'_A, -, \gamma)$ gdzie,dla
+wygody, zwykły GSS $\Gamma$ jest dzielony na pojedyncze stosy, $\gamma$. W
+trybie predykcji LL, $\gamma = \gamma_0$, które jest bądź pojedynczym stosem lub
+pustym jeśli A = S. W trybie SLL, $ \gamma = \#$, sygnalizując brak informacji
+o stosie. Funkcja \textit{closure} musi rozważać wszystkie możliwe $\gamma_0$
+wołania stosu parsera. Ponieważ jakikolwiek pojedynczy stos musi być zawarty
+w zbiorze wszystkich możliwych wołań stosu, operacje LL closure
+rozważają co najwyżej tę samą ilość ścieżek przez ATN co SLL.
+\\ \\
+\textbf{Lemat A.3.} Dla $w \notin L(G)$ i nie lewostronnie rekurencyjnej
+G, SLL zgłasza błąd składni.
+\\ \\
+Dowód. Podobnie jak w przypadku "tylko wtedy" Twierdzenia 6.1, nie ma poprawnego
+wyprowadzenia konfiguracji ATN dla $w$ bez względu jak adaptivePredict
+wybierze produkcje.
+\\ \\
+\textbf{Twierdzenie A.3.} Dwustopniowe parsowanie dla nie lewostronnie rekurencyjnej
+G rozpozna zdanie $w$ wtedy i tylko wtedy gdy $w \in L(G)$.
+\\ \\
+Dowód. Z Lematu A.3, SLL i LL zachowują się tak samo kiedy
+$w \notin L(G)$. Pozostaje pokazać że predykcja SLL bądź
+zachowuje się jak LL dla wejścia $w \in L(G)$ lub zgłasza błąd składni,
+sygnalizując potrzebę drugiej fazy LL. Niech $\mathcal{V}$ i $\mathcal{V'}$ będą
+zbiorami numerów wykonalnych produkcji dla A odpowiednio używając SLL i LL,
+Z Lematu A.2, $\mathcal{V'} \subseteq \mathcal{V}$. Są dwa przypadki
+do rozważenia:
+\begin{enumerate}
+\item If $min(\mathcal{V}) = min(\mathcal{V'})$, SLL i LL
+wybierają tą samą produkcję.
+SLL powiedzie się dla $w$. To jest, $\mathcal{V}$ = \{1, 2, 3\}
+i $\mathcal{V'}$ =
+\{1, 3\} or $\mathcal{V}$ = \{1\} i $\mathcal{V}$ = \{1\}.
+\item If $min(\mathcal{V}) \neq min(\mathcal{V'})$ wtedy $min(\mathcal{V})
+ \notin \mathcal{V]}$ ponieważ LL znajduje że
+$min(\mathcal{V})$ jest niewykonalna. SLL powinien zgłosić błąd składni.
+To jest, $\mathcal{V}$ = \{1, 2, 3\} i $\mathcal{V'}$ = \{2, 3\}
+lub $\mathcal{V}$ = \{1, 2\} i $\mathcal{V'}$ = \{2\}.
+\end{enumerate}
+We wszystkich możliwych kombinacjach $\mathcal{V}$ i $\mathcal{V'}$,
+SLL zachowuje się jak LL lub zgłasza błąd syntaktyczny dla $w \in L(G)$.
+\\ \\
+\textbf{Twierdzenie A.4.} GSS ma O(n) węzłów dla $n$ wejściowych symboli.
+Dowód. Dla nieterminali N i stanów Q ATN jest |N| $\times$
+|Q| $p\overset{A}{\rightarrow}q$ przejść ATN jeśli każda pozycja gramatyczna
+wywoła każdy nieterminal. To limituje ilość nowych węzłów GSS
+do $|Q|^2$ dla operacji closure (która nie może przejść
+krawędzi terminalowych). ALL(*) wykonują n + 1 operacji closure dla n symboli
+wejściowych dając $|Q|^2(n + 1)$ węzłów lub O(n) skoro Q nie jest
+funkcją wejścia.
+\\ \\
+\textbf{Lemat A.4.} Złożoność czasowa badania symbolu lookahead wynosi O($n^2$).
+\\ \\
+Dowód. Lookahead jest operacją move-closure która wylicza
+nowy docelowy stan DFA D' jako funkcję konfiguracji ATN
+w D. Jest $|Q| \times m \approx |Q|^2$ konfiguracji postaci
+(p, i, _) $\in$ D dla |Q| stanów ATN i $m$ alternatywnych
+produkcji w bieżącej decyzji. Koszt move nie jest
+funkcją rozmaru n wejścia. Closure D oblicza closure(c)
+$\forall c \in D$ and closure(c) może przejść spowrotem
+całe GSS do korzenia (pustego stosu). To daje koszt $|Q|^2$ konfiguracji
+razy $|Q|2(n + 1)$ węzły GSS (z Twierdzenia A.4) lub O(n)
+operacji dodawania by zbudować $D'$. Dodawanie konfiguracji jest dominujace
+przez łączenie grafu, które (w naszej implementacji) jest proporcjonalne
+do głębokości grafu. Całkowity koszt move-closure jest O($n^2$).
+\\ \\
+\textbf{Twierdzenie A.5.} Parsowanie ALL(*) n wejściowych symboli zajmuje
+O($n^4$) czasu.
+\\ \\
+Dowód. W najgorszym przypadku parser musi badać wszystkkie pozostałe
+symbole wejściowe podczas predykcji dla każdego z n wejściowych symboli
+dając O($n^2$) operacji lookahead. Koszt każdej operacji lookahead
+jest O($n^2$) z Lematu A.4 dając ogólny koszt parsowania O($n^4$).

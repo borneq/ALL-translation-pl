@@ -1,0 +1,51 @@
+﻿\section{Algorytm analizy składniowej ALL(*)}
+Z definicji gramatyki, sformalizowanych ATN i lookahead DFA, możemy przedstawić główne funkcje
+algorytmu analizy składniowej ALL(*).
+W części tej podsumowano wszystkie funkcje i opisano jak łączą się one, następnie omówiono
+wykres struktury danych przed przedstawianiem samych funkcji. Ostatecznie przedstawiono
+przykład jak działa algorytm.
+\par
+Parsowanie rozpoczyna się od funkcji \textit{parse}, która zachowuje się jak konwencjonalna
+zstępująca analiza funkcji LL(k), z wyjątkiem tego że parsery ALL(*) przewidują
+produkcje ze specjalną funkcją zwaną \textit{adaptivePredict},
+zamiast zwykłego mechanizmu „przełącz na następny typ symbolu k”.
+Funkcja \textit{adaptivePredict} symuluje ATN odzwierciedlając pierwotną gramatykę
+predykatu w wyborze produkcji $\alpha_i$ w celu rozwinięcia punktu decyzyjnego
+$A \rightarrow \alpha_1 | ... | \alpha_n$.
+Od strony koncepcyjnej, przewidywanie jest funkcją bieżącej analizy składniowej stosu wywołań
+$\gamma_0$, pozostałych danych wejściowych $w_r$ i stanu użytkownika $\mathbb{S}$ jeśli A posiada predykaty.
+Jeżeli chodzi o wydajność, przewidywanie ignoruje $\gamma_0$, gdy to tylko możliwe (Sekcja 3.1)
+i używa minimalnego lookahead z $w_r$.
+\par
+Aby uniknąć powtarzania symulacji ATN dla tych samych danych wejściowych i symboli nieterminalnych,
+\textit{adaptivePredict} składa DFA, który gromadzi mapowania danych wejściowych do przewidywanej produkcji,
+jeden DFA na symbol nieterminalny.
+Należy mieć na uwadze, że każdy stan DFA, D, jest zbiorem konfiguracji ATN dopuszczalnym po dopasowaniu
+symboli lookahead prowadzących do tego stanu.
+Funkcja \textit{adaptivePredict} wywołuje \textit{startState} do utworzenia początkowego stanu DFA,
+\( D_0 \) a następnie wywołuje \textit{SLLpredict} w celu uruchomienia symulacji.
+\par
+Funkcja \textit{SLLpredict} dodaje ścieżki do lookahead DFA, które pasują do niektórych lub wszystkich
+$w_r$ poprzez wielokrotne wołanie \textit{target}. Funkcja \textit{target} oblicza DFA docelowego stanu D'
+z bieżącego stanu D przy użyciu operacji \textit{move} i \textit{closure} podobnych do tych
+znalezionych w \textit{subset construction}.
+Funkcja \textit{move} wykrywa wszystkie konfiguracje ATN jako osiągalne na bieżącym symbolu wejściowym,
+a funkcja \textit{closure} wykrywa wszystkie konfiguracje jako osiągalne bez przemierzenia krawędzi terminalnej.
+Podstawową różnicą od podzbioru konstrukcji jest to, że \textit{closure} symuluje wywołanie
+i powrót podautomatów ATN związanych z symbolami nieterminali.
+\par
+W przypadku, gdy symulacja SLL wykryje konflikt (Sekcja 5.3), \textit{SLLpredict} przewija dane wejściowe
+i wywołuje \textit{LLpredict} w celu ponowienia próby przewidywania, tym razem biorąc pod uwagę $\gamma_0$.
+Funkcja \textit{LLpredict} jest podobna do \textit{SLLpredict}, ale nie aktualizuje symboli nieterminalnych
+DFA, ponieważ DFA musi być niezależny od stosu, aby mógł być wykorzystywany we wszystkich kontekstach stosu.
+Konflikty w zbiorach konfiguracji ATN wykryte przez \textit{LLpredict} reprezentują niejednoznaczności.
+Obie funkcje przewidywania używają \textit{getConflictSetsPerLoc} do wykrywania konfliktów,
+które są konfiguracjami określającymi tą samą lokalizację parsera, ale różne produkcje.
+Aby uniknąć niepowodzenia \textit{LLpredict}, \textit{SLLpredict} wykorzystuje \textit{getProdSetsPerState}
+aby zobaczyć czy potencjalnie bezkonfliktowa ścieżka DFA pozostaje gdy \textit{getConflictSetsPerLoc}
+zgłasza konflikt.
+Jeśli tak, to warto kontynuować proces \textit{SLLpredict}, mając nadzieję że więcej lookahead
+rozwiąże konflikt bez uciekania się do pełnej analizy składniowej LL.
+\par
+Zanim szczegółowo omówimy te funkcje, przedstawimy przegląd fundamentalnych danych struktury grafu,
+które efektywnie zarządzają wieloma stosami wywołań GLL i GLR.

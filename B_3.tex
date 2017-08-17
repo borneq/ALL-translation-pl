@@ -1,0 +1,27 @@
+﻿\subsection{Raportowanie i naprawa błędów}
+Predykcja ALL(*) może skanować dowolnie daleko naprzód tak że
+błędna sekwencja lookahead może być długa. Domyślnie parsery
+generowane przez ANTLR wypisują całą sekwencję. Do naprawy
+parsery konsumują wszystkie tokeny aż będzie token
+spełniający bieżącą regułę.
+ANTLR dostarcza możliwośći zmiany stategii raportowania i naprawy.
+\par
+Parsery ANTLR emitują komunikat błędu dla błędnej frazy wejściowej
+i próbują naprawić. Dla niezgodnych tokenów ANTLR
+próbuje wstawiania i usuwania pojedynczych tokenów do synchronizacji.
+Jeśli pozostałe symbole wejściowe są niezgodne z jakąkolwiek
+produkcją bieżącego nieterminala, parser konsumuje tokeny aż znajdzie
+token któy rozsądnie nastąpił by po bieżącym nieterminalu.
+Następnie parser kontunuje parsowanie jakby biezący nieterminal
+był prawidłowy. ANTLR naprawił obsługę błędów w porównaniu z ANTLR
+3 dla podreguł EBNF przez wstawienie sprawdzania synchronizacji
+na początek i do "pętli" kontunuacji test by uniknąć przedwczesnego
+wyjścia z subreguły. Na przykład, rozważmy następującą regułę
+definicji klasy.\\
+classdef : 'class' ID 'f' member+ 'g' ;\\
+member : 'int' ID ';' ;\\
+Dodatkowy średnik w liście member taki jak i;; int
+j; nie powinien zmuszać otaczającą regułę classdef do przerwania.
+Zamiast tego, parser ignoruje dodatkowy średnik i patrzy na inny
+member. Aby zredukować kaskadę błędnych komunikatów, parser
+nie emituje dalszych komunikatów aż poprawnie dopasuje token.

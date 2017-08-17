@@ -1,0 +1,69 @@
+﻿\section{Wprowadzenie}
+Analiza składniowa języka programowania wciąż pozostaje nierozwiązanym w praktyce problemem,
+pomimo współczesnych strategii analizy składniowej i długiej historii analizy naukowej.
+W czasach gdy zasoby maszynowe były znikome, sensownym było nakazanie programistom aby dostosowali
+swoje gramatyki do deterministycznych generatorów parsera LALR(k) lub LL(k).\footnotemark[1]
+\footnotetext[1]{Używamy terminu ‘deterministyczny’ w taki sposób, aby deterministyczny automat
+skończony (DFA) różnił się od nie-deterministycznego automatu skończonego (NFA):
+następny symbol jednoznacznie określający działanie.}
+Wraz ze wzrostem zasobów maszynowych, opracowano bardziej wydajne, jednakże kosztowniejsze,
+niedeterministyczne strategie analizy składniowej przestrzegające podejścia zarówno „wstępującego”
+(czyli parsery LR) jak i „zstępującego” (parsery LL).
+Strategie obejmują GLR [26], Parser Expression Grammar (PEG) [9], LL (*) [20] z ANTLR 3,
+i najnowszą GLL [25], w pełni ogólną strategię zstępującą.
+\par
+Pomimo, że te nowsze strategie są znacznie łatwiejsze w użyciu niż generatory parsera LALR(k) i LL(k),
+posiadają wiele wad.
+Po pierwsze, niedeterministyczne parsery wykazują czasami nieoczekiwane zachowanie.
+GLL i GLR przeprowadzają wielokrotną analizę składniową drzew (lasów) dla niejednoznacznej gramatyki,
+ponieważ zostały zaprojektowane do obsługi gramatyki języka naturalnego,
+która jest często celowo niejednoznaczna.
+W przypadku języków programowania niejednoznaczność jest prawie zawsze błędem.
+Z pewnością można przejść skonstruowany las parsowania w celu ujednoznacznienia,
+ale takie podejście wymaga dodatkowego czasu, miejsca i mechanizmu dla rzadkich przypadków. 
+PEG są jednoznaczne z definicji, ale posiadają aberrację, gdzie reguła \(A \rightarrow a | ab\)
+(co oznacza że „A pasuje do a bądź do ab”) nigdy nie może pasować do ab, ponieważ
+PEG wybierają pierwszą alternatywę, która pasuje do prefiksu pozostałych danych wejściowych.
+Zagnieżdżony algorytm z nawrotami (backtracking) utrudnia debugowanie PEG. 
+\par
+Po drugie, akcje dostarczane przez programistę mające działania uboczne (mutatory),
+takie jak składnia print, musza być unikane należy unikać w jakiejkolwiek strategii,
+która bez przerwy spekuluje (PEG) lub obsługuje wiele interpretacji danych wejściowych
+(GLL i GLR), ponieważ takie działania nigdy nie powinny mieć miejsca [17].
+(Chociaż DParser [24] wspiera „finalne” akcje, gdy programista jest pewny, że redukcja
+jest częścią jednoznacznej finalnej analizy).
+Aby nie było efektów ubocznych, akcje muszą buforować dane dla wszystkich interpretacji
+w niezmiennych strukturach danych lub dostarczać akcje cofania (undo).
+Poprzedni mechanizm jest ograniczony poprzez rozmiar pamięci,a drugi nie zawsze jest łatwy albo możliwy.
+Typowym podejściem unikania mutatorów jest skonstruowanie drzewa analizy do analizy
+po zakończeniu przetwarzania, ale takie wytwory zasadniczo ograniczają analizowanie
+do plików wejściowych, których drzewa mieszczą się w pamięci.
+Parsery które budują drzewa analizy, nie mogą analizować dużych plików danych albo
+nieskończonych strumieni, taki jak ruch w sieci, chyba że mogą być przetwarzane w logicznych kawałach.
+\par
+Po trzecie, nasze badania (Część 7) wykazują, że GLL i GLR mogą być powolne i o nieprzewidywalnej
+złożoności w czasie i przestrzeni.
+Ich złożoności są, odpowiednio O(n3) i O(np+ 1) gdzie p jest długością
+najdłuższej produkcji w gramatyce [14].
+(GLR zazwyczaj jest określane jako O(n3) ponieważ Kipps [15] przedstawił taki algorytm,
+aczkolwiek z czynnikiem stałym tak wysokim że aż niepraktycznym).
+Teoretycznie, ogólne parsery powinny obsługiwać deterministyczne gramatyki w prawie liniowym czasie.
+W praktyce okazało się, że GLL i GLR są ~135x wolniejsze niż ALL(*)
+w zbiorze 12'920 plików źródłowych biblioteki Java 6 (123 M)
+i odpowiednio 6 rzędów wielkości wolniejsze w pojedynczym pliku 3.2 M Java.
+\par
+LL(*) obchodzą te słabości dostarczając głównie deterministycznej strategii analizy składniowej,
+która używa wyrażeń regularnych stanowiących deterministyczne automaty skończone (DFA),
+aby potencjalnie zbadać wszystkie pozostałe dane wejściowe zamiast ustalonych k-sekwencji LL(k).
+Użycie DFA dla lookahead limituje decyzje LL(*) do rozróżniania alternatywy do regularnego
+języka symboli podglądanych (lookahead),
+mimo że języki lookahead (zbiór wszystkich możliwych pozostałych wyrażeń wejściowych)
+są często bezkontekstowe. Ale głównym problemem jest to, że warunek gramatyki LL(*)
+jest statycznie nierozstrzygalny, a analiza gramatyczna, aby znaleźć wyrażenia regularne,
+które rozróżniają alternatywne produkcje, czasami nie powiedzie się.
+Statyczna analiza ANTLR 3 wykrywa i unika potencjalnie nierozstrzygalnych sytuacji,
+zamiast tego wydobywa się z niepowodzenia doprowadzając do analizy składniowej z powrotami.
+Wykazując w LL(*) tą samą aberrację a | ab co w PEG dla takich decyzji.
+Cofanie się, wybierając pierwszą pasującą alternatywę również nie może wykrywać
+oczywistych niejednoznaczności, takich jak \(A \rightarrow \alpha | \alpha \) gdzie \(\alpha\)
+jest ciągiem symbolów gramatycznych, co sprawia że \(\alpha | \alpha \) jest nie-LL(*).

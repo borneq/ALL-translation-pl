@@ -1,0 +1,25 @@
+﻿\subsection{Oddziaływanie lookahead DFA na wydajność}
+Lookahead DFA cache jest krytyczne gdy chodzi o wydajność ALL(*).
+Aby zademonstrować odziaływanie cache na prędkość parsowania, zablokowaliśmy DFA
+i powtórzyliśmy nasze eksperymenty z Javą.
+Rozważmy czas parsowania 3.73s z Obrazka 9 reparsowania korpusu Javy z czystymi
+trafieniami w cache.
+Z zablokowanym zupełnie lookahead DFA cache, parserowi zajmowało to 12 minut (717.6s).
+Obrazek 10 pokazuje że zablokowanie cache zwiększa czas parsowania z 203ms do 42.5s na 3.2M pliku.
+Ta wydajność jest zgodna z wysokim kosztem parserów GLL i GLR które również nie redukują
+spekulacji przez zapamiętywanie decyzji parsera.
+Jako pośrednia wartość, czyszczenie cache DFA przed parsowaniem każdego pliku
+korpusu powoduje że całkowity czas wynosi 34s zamiast 12 minut.
+To izoluje użycie cache do jednego pliku i demonstruje żet rozgrzewka cache
+zdarza się szybko nawet przy pojedynczym pliku.
+\par
+Wielkość DFA zwiększa się liniowo gdy parser napotyka nowe frazy lookahead.
+Obrazek 12 pokazuje wzrost ilości stanów DFA jak (najwolniejsze cztery) parsery z Obrazka 11
+napotyka nowe pliki. Języki jak C które są skonstruowane z
+wspólną lewy-prefix wymaga głębokiego lookahead w LL parserach do
+rozróżnienia fraz; np. struct {...} x; i struct {...}f(); dzielą wielki lewy-prefiks.
+W przeciwieństwie Verilog2001 parser używa bardzo mało stanów DFA
+(ale działa wolniej z powodu reguły nie SLL). Podobnie, po przejrzeniu całego 123M korpusu Java,
+Java parser używa właśnie 31'626 stanów DFA, dodając średnio  ˜2.5 stanu na parsowany plik.
+Wielkość DFA jednak rośnie gdy parser napotyka nieznane wejście.
+Programiści mogą czyścić cache i ALL(*) zaadaptuje się do kolejnego wejścia.

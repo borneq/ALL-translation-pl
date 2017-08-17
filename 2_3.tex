@@ -1,0 +1,22 @@
+﻿\subsection{Analiza leksykalna przy użyciu ALL(*)}
+ANTLR używa wariacji ALL(*) dla lekserów, które w pełni przypasowują tokeny
+zamiast po prostu przewidywać produkcje, jak to robią parsery ALL(*).
+Po rozbiegu, lekser tworzy DFA podobne do tego, co utworzyłyby statycznie
+wyrażenia regularne w oparciu o narzędzia takie jak lex.
+Podstawową różnicą jest to, że leksery ALL(*) obsługują predykatywną gramatykę
+bezkontekstową a nie wyrażenia regularne, tak więc mogą rozpoznawać
+bezkontekstowe symbole, takie jak zagnieżdżone komentarze i mogą wpuszczać
+lub nie symbole zgodnie z semantycznym kontekstem. 
+Ten zamysł jest możliwy ponieważ ALL(*) jest wystarczająco szybki, aby
+obsłużyć zarówno analizę leksykalną jak i parsowanie.
+\par
+ALL(*) nadaje się również do analizy składniowej bez skanera ze względu na
+siłę rozpoznania, która jest przydatna w leksykalnych problemach kontekstowych,
+takich jak łączenie języków C i SQL.
+Takie połączenie nie ma wyraźnych leksykalnych granic wytyczających leksykalne regiony: \\
+ \texttt{
+int next = select ID from users where name='Raj'+1; \\
+int from = 1, select = 2; \\
+int x = select * from; \\
+}
+Zobacz gramatyczny kod/dodatki/CSQL [19] dla dowiedzenia koncepcji. 
