@@ -8,5 +8,7 @@ http://www.antlr.org/papers/allstar-techreport.pdf
 Wytyczne:
 - edytor TeXworks.
 - konwersja pdfLatex
-- UTF8 ma BOM
+- UTF8 nie może mieć BOM (wersja Linux TeXWorks nie dopuszcza)
 - podział na krókie wiersze dla porównań gita
+
+startowy: allstar-techreportPL.tex
