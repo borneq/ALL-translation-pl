@@ -8,12 +8,12 @@ pierwszą alternatywę z tych która prowadzi do prawidłowej analizy składniow
 Wszystko nie lewostronnie rekurencyjne gramatyki są zatem ALL(*).
 \par
 Zamiast polegać na statycznej analizie gramatyki,
-parser ALL(*) przystosowuje się do zdań wejściowych przedstawionych w czasie analizowania.
+parser ALL(*) adaptuje się do zdań wejściowych przedstawionych w czasie parsowania.
 Parser analizuje bieżący punkt decyzyjny (symbol nieterminalny przy wielu produkcjach)
 używając mechanizmu GLR, aby zbadać wszystkie możliwe ścieżki decyzyjne
 w odniesieniu do bieżącego „stosu wywołań” wewnątrz-procesowych symboli nieterminalnych,
 a pozostałe dane wejściowe na żądanie. Analizator stopniowo i dynamicznie
-tworzy jeden automat lookahead DFA na jedną decyzję, która rejestruje mapowania
+tworzy jeden automat lookahead DFA na jedną decyzję, który zapisuje mapowania
 z sekwencji lookahead na numer przewidywanej produkcji.
 Jeśli utworzone DFA pasuje do bieżącego lookahead, parser może ominąć analizę
 i natychmiast rozwinąć przewidzianą alternatywę.
@@ -51,29 +51,29 @@ void stat() { // parse according to rule stat
 \par
 Ze względu na fakt, iż ALL(*) różni się od deterministycznych zstępujących
 metod tylko w mechanizmie przewidywania, możemy utworzyć konwencjonalne parsery
-rekurencyjne LL, ale z ważnym wyróżnikiem.
-Parsery ALL(*) wywołują specjalne funkcje przewidywania, adaptivePredict,
-która analizuje gramatykę w celu utworzenia lookahead DFA
+rekurencyjne LL, ale z istotnym wyróżnikiem.
+Parsery ALL(*) wywołują specjalną funkcję przewidywania, adaptivePredict,
+która analizuje gramatykę w celu utworzenia automatu lookahead DFA
 zamiast po prostu porównywać lookahead z statycznie obliczonym zbiorem symboli.
 Funkcja adaptivePredict przyjmuje symbole nieterminalne i stos wywołań parsera
 jako parametry i zwraca przewidziany numer produkcji lub zgłasza wyjątek,
-jeśli nie ma żadnej wykonalnej produkcji. Na przykład, zasada stat z przykładu
+jeśli nie ma żadnej wykonalnej produkcji. Na przykład, reguła stat z przykładu
 w Sekcji 2.1 odzwierciedla analizę składniową przedstawioną na Rysunku 2.
 \par
 Przewidywanie ALL(*) ma podobną strukturę do znanego algorytmu budowy
-podzbiór NFA-to-DFA. Celem jest wykrycie zbioru stanów, które parser może
+podzbióru NFA-to-DFA. Celem jest wykrycie zbioru stanów, które parser może
 osiągać po obejrzeniu niektórych lub wszystkich pozostałych danych wejściowych
-w stosunku do obecnej decyzji. Podobnie jak w utworzonym podzbiorze,
-stan DFA ALL(*) jest możliwym zbiorem konfiguracji analizatora po dopasowaniu
-danych wejściowych prowadzących do tego stanu. Zamiast NFA, ALL(*) symuluje
+w stosunku do obecnej decyzji. Podobnie jak przy  tworzeniu podzbiorów,
+stan DFA ALL(*) jest możliwym zbiorem konfiguracji parsera po dopasowaniu
+danych wejściowych prowadzących do tego stanu. Zamiast NFA jednak, ALL(*) symuluje
 działania rozszerzonej rekurencyjnej sieci przejść (ATN) [27]
 odzwierciedlając gramatykę, gdyż ATNs ściśle odzwierciedlają strukturę gramatyki.
 \par
 (ATNs wyglądają podobnie jak diagramy składniowe, które mogą posiadać działania
-i semantyczne predykaty). Statyczna analiza LL(*) również działa w ATN z tego
-samego powodu. Rysunek 3 przedstawia podautomat ATN dla zasady stat.
-Konfiguracja ATN reprezentuje stan przeprowadzenia subparser i śledzi stan ATN,
-przewidziany numer produkcji, oraz stos wywołań subparsera ATN: krotka (p, i, y).
+i semantyczne predykaty). Statyczna analiza LL(*) również operuje na ATN z tego
+samego powodu. Rysunek 3 przedstawia podautomat ATN dla reguły stat.
+Konfiguracja ATN reprezentuje stan wykonania subparsera i śledzi stan ATN,
+przewidziany numer produkcji, oraz stos wywołań subparsera ATN: krotka (p, i, $\gamma$).
 1 Konfiguracje obejmują numery produkcji, tak więc przewidywanie może identyfikować
 która produkcja pasuje do bieżącego lookahead.
 W przeciwieństwie do analizy statycznej LL(*), ALL(*) stopniowo buduje DFA,
@@ -92,14 +92,14 @@ Gdy analiza składniowa podejmuje decyzję po raz pierwszy, adaptivePredict
 inicjuje lookahead DFA dla tej decyzji poprzez utworzenie stanu DFA, $D_0$.
 $D_0$ jest zbiorem konfiguracji subparser ATN osiągalnym bez wykorzystywania
 początkowego symbolu wejściowego w każdej lewej stronie produkcji.
-Na przykład, tworzenie D0 dla nieterminali stat na Rysunku 3 rozpoczyna się
+Na przykład, tworzenie $D_0$ dla nieterminali stat na Rysunku 3 rozpoczyna się
 od dodania konfiguracji ATN (p; 1; []) i (q; 2; []) gdzie p i q są stanami
-ATN analogicznymi dla produkcji 1 i 2 lewych stron, a [] jest pustym subparserem
-stosu wywołań (jeśli stat jest symbolem początkowym).
+ATN analogicznymi dla produkcji 1 i 2 lewych stron, a [] jest pustym stosem wywołań dla subparsera
+(jeśli stat jest symbolem początkowym).
 \par
 Analiza następnie oblicza nowy stan DFA, wskazując gdzie symulacja ATN może
 być osiągalna po wykorzystaniu pierwszego symbolu lookahead, po czym łączy
-dwa stany DFA z krawędzią oznaczoną tym symbolem. Analiza postępuje,
+dwa stany DFA krawędzią oznaczoną tym symbolem. Analiza postępuje,
 dodając nowe stany DFA, aż wszystkie konfiguracje ATN w nowo utworzonym
 stanie DFA przewidują taką samą produkcję: (-; i; -).
 Funkcja adaptivePredict uznaje ten stan za akceptowalny i powraca do parsera
@@ -112,19 +112,19 @@ Najczęściej adaptivePredict odnajduje istniejący DFA dla konkretnej decyzji.
 Celem jest znalezienie lub utworzenie ścieżki poprzez DFA do akceptowalnego stanu.
 Jeśli adaptivePredict osiągnie (nieakceptowalny) stan DFA bez krawędzi
 dla bieżącego symbolu lookahead, powraca do symulacji ATN aby rozszerzyć DFA
-(bez przewijania danych wejściowych). Na przykład, do analizy drugiego zwrotu
+(bez odwijania danych wejściowych). Na przykład, do analizy drugiej frazy
 danych wejściowych dla stat, takich jak f(x);, adaptivePredict znajduje
-istniejącą krawędź ID z D0 i przeskakuje do s1 bez symulacji ATN.
-Nie ma żadnego istniejącej krawędzi z s1 dla lewego nawiasu, tak więc analiza
+istniejącą krawędź ID z $D_0$ i przeskakuje do $s_1$ bez symulacji ATN.
+Nie ma żadnego istniejącej krawędzi z $s_1$ dla lewego nawiasu, tak więc analiza
 symuluje ATN aby zakończyć ścieżkę do akceptowalnego stanu,
 który przewiduje drugą produkcję, zgodnie z Rysunkiem 4b.
 Należy zauważyć, że z faktu iż sekwencja ID (ID) przewiduje obie produkcje,
-analiza postępuje aż DFA będzie posiadać krawędzie dla symboli = i;.
+analiza postępuje dotąd aż DFA będzie posiadać krawędzie dla symboli = i;.
 \par
 Jeśli symulacja ATN oblicza nowy stan docelowy, który już istnieje w DFA,
 symulacja dodaje nową krawędź nakierowując istniejący stan i przełączając się
-na tryb symulacji DFA, począwszy od tego stanu. Nakierowanie istniejących
-stanów przedstawia jak cykle mogą pojawiać się w DFA.
-Rozszerzając DFA do obsługi nieznanych zwrotów empirycznie zmniejszając
+na tryb symulacji DFA, począwszy od tego stanu. Wskazywanie jako cel Istniejących
+stanów powoduje że w DFA mogą pojawiać się cykle.
+Rozszerzanie DFA do obsługi nieznanych fraz empirycznie zmniejsza
 prawdopodobieństwo przyszłych symulacji ATN, tym samym zwiększając szybkość
 analizy składniowej (Część 7). 

@@ -52,7 +52,7 @@ automatycznie oraz znaną niejednoznaczność if-then-else w zwykły sposób
 poprzez kojarzenie ‘else’ z ostatnim ‘if’. Parsery PEG i Bison mają te same zasady rozpoznawania.
 \par
 Do rozpoznania niejednoznaczności, które zależą od bieżącego stanu S, programiści mogą
-wprowadzać semantyczne predykaty, jednakże muszą wzajemnie wykluczyć dla wszystkich
+wprowadzać predykaty semantyczne, jednakże muszą wzajemnie wykluczyć dla wszystkich
 potencjalnie niejednoznacznych sekwencji wejściowych do otrzymania tego typu jednoznacznych produkcji.
 Statycznie wzajemnych wykluczeń nie da się wymusić, ponieważ predykaty są napisane w języku Turinga.
 Jednakże, w czasie analizy ALL(*) wylicza predykaty i dynamicznie raportuje

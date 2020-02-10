@@ -1,9 +1,9 @@
 \subsection{Analiza leksykalna przy użyciu ALL(*)}
-ANTLR używa wariacji ALL(*) dla lekserów, które w pełni przypasowują tokeny
+ANTLR używa odmiany ALL(*) dla lekserów, które w pełni przypasowują tokeny
 zamiast po prostu przewidywać produkcje, jak to robią parsery ALL(*).
 Po rozbiegu, lekser tworzy DFA podobne do tego, co utworzyłyby statycznie
 wyrażenia regularne w oparciu o narzędzia takie jak lex.
-Podstawową różnicą jest to, że leksery ALL(*) obsługują predykatywną gramatykę
+Podstawową różnicą jest to, że leksery ALL(*) obsługują predykatywową gramatykę
 bezkontekstową a nie wyrażenia regularne, tak więc mogą rozpoznawać
 bezkontekstowe symbole, takie jak zagnieżdżone komentarze i mogą wpuszczać
 lub nie symbole zgodnie z semantycznym kontekstem. 

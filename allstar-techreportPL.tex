@@ -16,7 +16,7 @@
 %+Title
 \title{Adaptacyjny parsing LL(*): moc dynamicznej analizy }
 \author{ Terence Parr, University of San Francisco, parrt@cs.usfca.edu \and  Sam Harwell, University of Texas at Austin, samharwell@utexas.edu \and  Kathleen Fisher, Tufts University, ksher@eecs.tufts.edu}
-\date{19 sierpnia 2017}
+\date{10 lutego 2020}
 \maketitle
 %-Title
 
@@ -42,7 +42,7 @@ Tłumaczenie na język polski: Andrzej Borucki; oryginalny dokument `Adaptive LL
 
 %+Abstract
 \begin{abstract}
-    Pomimo postępów wprowadzanych przez nowoczesne strategie analizy składniowej, takie jak PEG, LL(*), GLR, i GLL, analiza składniowa nadal pozostaje nierozwiązanym problemem. Istniejące podejścia cierpią na szereg niedociągnięć, w tym trudności wspierające efekty uboczne akcji osadzonych, powolność i/lub nieprzewidywalną wydajność, oraz sprzeczne strategie dopasowania. Artykuł ten przedstawia strategię analizy składniowej ALL(*), która łączy w sobie prostotę, skuteczność i przewidywalność konwencjonalnych zstępujących parserów LL(k) z siłą mechanizmów GLR odnośnie analizy decyzyjnej. Kluczową innowacją jest nakierowanie analizy gramatycznej na działanie podczas czasu parsowania, która umożliwia ALL(*) obsługę wszelkiej nielewostronnie rekurencyjnej bezkontekstowej gramatyki. ALL(*) ma złożoność czasu parsowania teoretycznie O(n4), ale konsekwentnie działa liniowo na gramatykach wykorzystywanych w praktyce, wyprzedzając ogólne strategie, takie jak GLL i GLR o rzędy wielkości. ANTLR 4 generuje parsery ALL(*) i obsługuje bezpośrednią lewostronną rekurencję poprzez przepisanie gramatyki. Powszechne stosowanie ANTLR 4 (5000 pobrań miesięcznie w 2013) dostarcza dowodów, że ALL(*) jest skuteczne dla szerokiej gamy zastosowań.
+    Pomimo postępów poczynionych przez nowoczesne strategie analizy składniowej, takie jak PEG, LL(*), GLR, i GLL, analiza składniowa nadal pozostaje nierozwiązanym problemem. Istniejące podejścia cierpią na szereg niedociągnięć, w tym trudności wspierające efekty uboczne akcji osadzonych, powolność i/lub nieprzewidywalną wydajność, oraz kontr-intuicyjne strategie dopasowania. Artykuł ten przedstawia strategię analizy składniowej ALL(*), która łączy w sobie prostotę, skuteczność i przewidywalność konwencjonalnych zstępujących parserów LL(k) z siłą mechanizmów podobnego do GLR odnośnie analizy decyzyjnej. Kluczową innowacją jest nakierowanie analizy gramatycznej na działanie podczas czasu parsowania, która umożliwia ALL(*) obsługę wszelkiej nielewostronnie rekurencyjnej bezkontekstowej gramatyki. ALL(*) ma złożoność czasu parsowania teoretycznie O(n4), ale konsekwentnie działa liniowo na gramatykach wykorzystywanych w praktyce, wyprzedzając ogólne strategie, takie jak GLL i GLR o rzędy wielkości. ANTLR 4 generuje parsery ALL(*) i obsługuje bezpośrednią lewostronną rekurencję poprzez przepisanie gramatyki. Powszechne stosowanie ANTLR 4 (5000 pobrań miesięcznie w 2013) dostarcza dowodów, że ALL(*) jest skuteczne dla szerokiej gamy zastosowań.
 \end{abstract}
 %-Abstract
 

@@ -45,11 +45,11 @@ Oto dwa przykłady, które dzielą stos parsera $\gamma_0$ w dolnej części sto
 W funkcjach, które omówimy, wszystkie dodatki do zbiorów konfiguracji, takie jak w przypadku operatora +=, domyślnie łączą stosy.
 \par
 Występuje szczególny przypadek związany z warunkiem stosu na początku przewidywania.
-$\Gamma$ musi rozróżniać pomiędzy pustym stosem a brakiem informacjami stosu.
+$\Gamma$ musi rozróżniać pomiędzy pustym stosem a brakiem informacji na temat stosu.
 Dla przewidywania LL, początkowa symulacja stosu ATN jest bieżącym parserem stosu wywołań $\gamma_0$.
 Początkowy stos jest pusty, $\gamma_0$ = [], gdy reguła decyzji wejścia jest symbolem startowym.
 Przewidywanie SLL niezależne od stosu, z drugiej strony, ignoruje parser stosu wywołań i używa początkowego
-stosu \# wskazując brak informacji stosu.
+stosu \# wskazując brak informacji na temat stosu.
 To rozróżnienie jest ważne obliczając \textit{closure} (Funkcja 7) konfiguracji
 stanowiące stan zatrzymania podmaszyny. Bez informacji stosu parsera, subparser który zwraca
 z decyzji wejścia regułę A musi wziąć pod uwagę wszystkie możliwe wywołania miejsc

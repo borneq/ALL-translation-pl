@@ -1,7 +1,7 @@
 \subsection{Lookahead DFA}
 Parsery ALL(*) odnotowują wyniki przewidywań uzyskane z symulacji ATN wraz z lookahead DFA,
-które są rozszerzonym DFA z akceptowalnym stanem, odzwierciedlając numer przewidywanej produkcji.
-Występuje jeden akceptowalny stan na decyzję produkcji. 
+które są rozszerzonym DFA z akceptowalnymi stanami, odzwierciedlającymi numer przewidywanej produkcji.
+Występuje jeden akceptowalny stan decyzji na produkcję.
 Definicja 4.1. Lookahead DFA to DFA rozszerzony o akceptujące stany,
 który dostarcza numer przewidywanej produkcji.
 Dla gramatyki predykatowej \(G = (N, T, P, S, \Pi, \mathcal{M}), DFA M = (Q, \Sigma, \Delta, D_0, F) \) gdzie
@@ -10,7 +10,7 @@ Dla gramatyki predykatowej \(G = (N, T, P, S, \Pi, \mathcal{M}), DFA M = (Q, \Si
 \item \(\Sigma = T \)jest alfabetem krawędzi
 \item \( \Delta \) jest funkcją przejścia mapującą \( Q \times \Sigma \rightarrow Q \)
 \item \( D_0 \in Q \) jest stanem startowym
-\item \( F \subset Q  = \{  f_1, f_2, ..., f_n\}\) stany końćowe, jeden \( f_i \)  dla produkcji i
+\item \( F \subset Q  = \{  f_1, f_2, ..., f_n\}\) stany końcowe, jeden \( f_i \)  dla produkcji i
 \end{itemize}
 Przejście w \( \Delta \) ze stanu p do stanu q na symbolu \( a \in \Sigma \)
 ma postać \( p \overset{a}{\rightarrow} q \) i wymagamy by \(p \overset{a}{\rightarrow} q' \)

@@ -13,8 +13,8 @@ wykazuje niepowodzenie w decyzji z nawrotami (backtracking) podczas uruchomienia
 Predykat \{!enum\textunderscore is\textunderscore keyword?\} w regule id
 umożliwia lub uniemożliwia enum jako prawidłowy identyfikator według predykatu
 w chwili przewidywania. Gdy predykat jest false, parser traktuje id jako
-tylko id:ID; odrzucając enum jako id gdy lexer pasuje do enum jako oddzielny
-symbol ID. Przykład ten przedstawia jak predykaty umożliwiają pojedynczej
+id:ID; odrzucając enum jako id gdy lexer pasuje do enum jako inny token niż 
+ID. Przykład ten przedstawia jak predykaty umożliwiają pojedynczej
 gramatyce opisanie podzbiorów albo wariacji tego samego języka. 
 \begin{figure}[!ht]
 grammar Ex; \textcolor{PineGreen}{// generuje klasę ExParser} \\

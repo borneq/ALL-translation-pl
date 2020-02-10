@@ -1,13 +1,13 @@
 \subsection{Gramatyka predykatowa}
-Aby przeprowadzić formalny proces analizy składniowej ALL(*), najpierw należy formalnie
-określić gramatykę predykatową z której jest ona czerpana.
+Aby sformalizować parsing ALL(*), najpierw należy formalnie
+określić gramatykę predykatową z której jest ona wyprowadzana.
 Gramatyka predykatowa \(G = (N, T, P, S, \Pi, \mathcal{M})\) składa się z następujących elementów: 
 \begin{itemize}
-\item N jest zbiorem nie-terminali (nazwy reguł) 
+\item N jest zbiorem nieterminali (nazwy reguł)
 \item T jest zbiorem terminali (symboli) 
 \item P jest zbiorem produkcji 
 \item \(S \in N\) jest symbolem początkowym 
-\item \( \Pi \) jest zbiorem efektów ubocznych semantycznych predykatów
+\item \( \Pi \) jest zbiorem efektów predykatów wolnych od efektów ubocznych
 \item \(\mathcal{M}\) jest zbiorem działań (mutatorów) 
 \end{itemize}
 Gramatyki predykatowe ALL(*) różnią się od tych z LL(*) [20] jedynie tym że
@@ -37,8 +37,8 @@ Język L jest ALL(*) wtedy i tylko wtedy jeśli występuje gramatyka ALL(*) dla 
 Teoretycznie, klasa języka L(G) jest rekurencyjnie przeliczalna,
 ponieważ każdy mutator może być maszyną Turinga.
 W rzeczywistości, autorzy gramatyki nie wykorzystują tego ogólnika,
-tak więc jest to przyjęty sposób postępowania do rozważenia klasy języka,
-zamiast kontekstowego języka. Klasa jest zależna od kontekstu, a nie bezkontekstowa,
+tak więc jest to przyjęty sposób postępowania do rozważenia klasy języka jako kontekstowego.
+Klasa jest zależna od kontekstu, a nie bezkontekstowa,
 ponieważ predykaty mogą badać stos wywołań i terminale z lewej i prawej.
 \par
 Ten formalizm uwzględnia różne składniowe ograniczenia, które nie są obecne w rzeczywistej

@@ -1,7 +1,7 @@
 \section{ANTLR 4}
 ANTLR 4 akceptuje jako dane wejściowe gramatykę bezkontekstową, która nie
-zawiera lewostronnej rekursji pośredniej lub ukrytej. \footnotemark[2]
-\footnotetext[2]{Pośrednio lewostronnie rekurencyjne reguły wołają siebie
+zawiera lewostronnej rekurencji pośredniej lub ukrytej. \footnotemark[2]
+\footnotetext[2]{Pośrednie lewostronnie rekurencyjne reguły wołają siebie
 przez inną regułę; np., \(A \rightarrow B, B \rightarrow A \).
 Ukryta lewostronna rekurencja jest wtedy gdy pusta produkcja ujawnia lewostronną
 rekurencję; np., \(A \rightarrow BA, B \rightarrow \epsilon \)}
@@ -9,7 +9,7 @@ Z tej gramatyki, ANTLR 4 generuje parser rekurencyjny, który korzysta z funkcji
 przewidywania produkcji ALL(*) (Część 3). ANTLR obecnie generuje parsery w Java
 i C{\#}.
 Gramatyka ANTLR 4 wykorzystuje składnię yacc z rozszerzonym BNF (EBNF),
-takim jak domknięcie Kleene'ego(*) i symbol literałów w pojedynczym cudzysłowie.
+takim jak domknięcie Kleene'ego(*) i symbole literałów w pojedynczym cudzysłowie.
 Gramatyka zawiera zarówno leksykalne jak i składniowe reguły wraz ze specyfikacjami.
 ANTLR 4 generuje zarówno lekser jak i parser z połączonych specyfikacji.
 Używając pojedynczych znaków jako symboli wejściowych, gramatyka ANTLR 4
@@ -20,7 +20,7 @@ opisanej przez Grimm [10]. (W dalszej części ANTLR 4 jest określane jako ANTL
 Programiści mogą wstawiać akcje z efektami ubocznymi (mutatory),
 zapisywane językiem docelowym (np. w Javie). Działania mają dostęp do bieżącego
 stanu analizatora. Parser ignoruje mutatory podczas spekulacji,
-nie dopuszczając do „uruchomienia rakiety” spekulacyjnie.
+nie dopuszczając do „odpalenia wyrzutni” spekulacyjnie.
 Działania zazwyczaj pozyskują informacje ze strumienia wejściowego
 i tworzą struktury danych.
 \par

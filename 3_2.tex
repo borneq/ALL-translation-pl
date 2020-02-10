@@ -8,7 +8,7 @@ albo prawdziwy błąd składniowy, tak więc musimy ponownie rozpatrzyć wszystk
 dane wejściowe używający zoptymalizowanego trybu LL, który jest drugim etapem.
 Ta nieintuicyjna strategia, która potencjalnie parsuje cały strumień wejściowy dwukrotnie,
 może dramatycznie zwiększyć prędkość w porównaniu do jednoetapowego zoptymalizowanego trybu LL.
-Na przykład, dwu-etapowa analiza składniowa z gramatyką Java (Część 7) jest 8x szybsza
+Na przykład, dwuetapowa analiza składniowa z gramatyką Java (Część 7) jest 8x szybsza
 niż jednoetapowy zoptymalizowany tryb LL do przeprowadzania analizy składniowej korpus 123M.
 Dwuetapowa strategia opiera się na fakcie, że SLL zachowuje się jak LL
 lub otrzymujemy błąd składniowy (Twierdzenie 6.5).

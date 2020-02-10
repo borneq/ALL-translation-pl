@@ -1,8 +1,8 @@
 \section{Algorytm analizy składniowej ALL(*)}
 Z definicji gramatyki, sformalizowanych ATN i lookahead DFA, możemy przedstawić główne funkcje
 algorytmu analizy składniowej ALL(*).
-W części tej podsumowano wszystkie funkcje i opisano jak łączą się one, następnie omówiono
-wykres struktury danych przed przedstawianiem samych funkcji. Ostatecznie przedstawiono
+W części tej podsumowujemy wszystkie funkcje i opisujemy jak łączą się one, następnie omawiamy
+krytyczną strukturę danych przed przedstawianiem samych funkcji. Ostatecznie przedstawimy
 przykład jak działa algorytm.
 \par
 Parsowanie rozpoczyna się od funkcji \textit{parse}, która zachowuje się jak konwencjonalna
@@ -34,7 +34,7 @@ a funkcja \textit{closure} wykrywa wszystkie konfiguracje jako osiągalne bez pr
 Podstawową różnicą od podzbioru konstrukcji jest to, że \textit{closure} symuluje wywołanie
 i powrót podautomatów ATN związanych z symbolami nieterminali.
 \par
-W przypadku, gdy symulacja SLL wykryje konflikt (Sekcja 5.3), \textit{SLLpredict} przewija dane wejściowe
+W przypadku, gdy symulacja SLL wykryje konflikt (Sekcja 5.3), \textit{SLLpredict} odwija dane wejściowe
 i wywołuje \textit{LLpredict} w celu ponowienia próby przewidywania, tym razem biorąc pod uwagę $\gamma_0$.
 Funkcja \textit{LLpredict} jest podobna do \textit{SLLpredict}, ale nie aktualizuje symboli nieterminalnych
 DFA, ponieważ DFA musi być niezależny od stosu, aby mógł być wykorzystywany we wszystkich kontekstach stosu.
